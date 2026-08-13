@@ -1,0 +1,72 @@
+{
+  "name": "Add Ticket Comment",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Posts a public reply or an internal note on an existing ticket, optionally changing its status at the same time.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_add_ticket_comment",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "ticket_id"
+    },
+    {
+      "name": "body",
+      "label": "Comment",
+      "hint": "The comment text to add.",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "body"
+    },
+    {
+      "name": "is_public",
+      "label": "Public",
+      "hint": "False posts an internal note instead of a public reply.",
+      "data_type": "boolean",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "is_public"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed. Leave blank to leave status unchanged.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "status"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "comment_id",
+      "label": "Comment ID",
+      "data_type": "string",
+      "script_alias": "comment_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "created_at",
+      "label": "Created At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "string",
+      "script_alias": "created_at",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "is_public",
+      "label": "Public",
+      "data_type": "boolean",
+      "script_alias": "is_public",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

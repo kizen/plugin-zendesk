@@ -1,0 +1,145 @@
+{
+  "name": "Get Ticket",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Fetches a ticket's current state, including its requester's email address.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_get_ticket",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "ticket_id"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "subject",
+      "label": "Subject",
+      "data_type": "string",
+      "script_alias": "subject",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "data_type": "string",
+      "script_alias": "description",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "data_type": "string",
+      "script_alias": "status",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "data_type": "string",
+      "script_alias": "priority",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "data_type": "string",
+      "script_alias": "type",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags.",
+      "data_type": "string",
+      "script_alias": "tags",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "requester_email",
+      "label": "Requester Email",
+      "hint": "Requires a second lookup against the requester's user record — blank if that lookup fails.",
+      "data_type": "string",
+      "script_alias": "requester_email",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "requester_id",
+      "label": "Requester ID",
+      "data_type": "string",
+      "script_alias": "requester_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "assignee_id",
+      "label": "Assignee ID",
+      "data_type": "string",
+      "script_alias": "assignee_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "group_id",
+      "label": "Group ID",
+      "data_type": "string",
+      "script_alias": "group_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "data_type": "string",
+      "script_alias": "organization_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "data_type": "string",
+      "script_alias": "external_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "created_at",
+      "label": "Created At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "string",
+      "script_alias": "created_at",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "updated_at",
+      "label": "Updated At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "string",
+      "script_alias": "updated_at",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "ticket_url",
+      "label": "Ticket URL",
+      "hint": "Agent-facing ticket URL.",
+      "data_type": "string",
+      "script_alias": "ticket_url",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

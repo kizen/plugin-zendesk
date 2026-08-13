@@ -1,0 +1,80 @@
+{
+  "name": "Get Ticket Comments",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Fetches a ticket's conversation thread, pre-flattened into one formatted transcript for downstream LLM steps, plus the most recent comment on its own.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_get_ticket_comments",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "ticket_id"
+    },
+    {
+      "name": "public_only",
+      "label": "Public Only",
+      "hint": "If true, only include public replies — internal notes are excluded from the thread and from Last Comment.",
+      "data_type": "boolean",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "public_only"
+    },
+    {
+      "name": "limit",
+      "label": "Limit",
+      "hint": "Maximum number of most-recent comments to include; paginates automatically to satisfy this. Hard safety cap of 1000. Defaults to 100 if left unset.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "limit"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "thread_text",
+      "label": "Thread Text",
+      "hint": "The conversation as one formatted transcript, oldest to newest, e.g. \"[2026-07-30 14:02] Jane Agent (public): ...\".",
+      "data_type": "string",
+      "script_alias": "thread_text",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "comment_count",
+      "label": "Comment Count",
+      "hint": "Count of comments included in Thread Text, after applying Public Only and Limit.",
+      "data_type": "number",
+      "script_alias": "comment_count",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_body",
+      "label": "Last Comment Body",
+      "data_type": "string",
+      "script_alias": "last_comment_body",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_is_public",
+      "label": "Last Comment Is Public",
+      "data_type": "boolean",
+      "script_alias": "last_comment_is_public",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_author_id",
+      "label": "Last Comment Author ID",
+      "data_type": "string",
+      "script_alias": "last_comment_author_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

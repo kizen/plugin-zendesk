@@ -1,5 +1,5 @@
 {
-  "name": "Zendesk",
+  "name": "Zendesk Integration",
   "api_name": "zendesk",
   "version": "1.0.0",
   "description": "Manage Zendesk support tickets from Kizen agentic workflows.",

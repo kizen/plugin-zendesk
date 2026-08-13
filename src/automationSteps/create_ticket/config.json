@@ -1,0 +1,153 @@
+{
+  "name": "Create Ticket",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Opens a new ticket in the connected Zendesk account with a subject and an initial comment, optionally setting requester, priority, type, status, tags, assignee, group, external ID, and custom fields.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_create_ticket",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "subject",
+      "label": "Subject",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "subject"
+    },
+    {
+      "name": "comment_body",
+      "label": "Comment",
+      "hint": "The initial comment body — becomes the ticket's description.",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "comment_body"
+    },
+    {
+      "name": "requester_email",
+      "label": "Requester Email",
+      "hint": "Attributes the ticket to this requester, creating them if they don't already exist. Leave blank to use the connected Zendesk account as requester.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "requester_email"
+    },
+    {
+      "name": "requester_name",
+      "label": "Requester Name",
+      "hint": "Only used when Requester Email is also set.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "requester_name"
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "priority"
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "hint": "One of: problem, incident, question, task.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "type"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed. Zendesk defaults to open if omitted.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "status"
+    },
+    {
+      "name": "tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags, e.g. vip,billing",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "tags"
+    },
+    {
+      "name": "assignee_id",
+      "label": "Assignee ID",
+      "hint": "Numeric Zendesk agent ID.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "assignee_id"
+    },
+    {
+      "name": "group_id",
+      "label": "Group ID",
+      "hint": "Numeric Zendesk group ID.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "group_id"
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "hint": "Your own reference ID (e.g. a Kizen record ID) to correlate this ticket back to.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "external_id"
+    },
+    {
+      "name": "custom_fields",
+      "label": "Custom Fields",
+      "hint": "JSON array string of custom field objects, e.g. [{\"id\": 360000123456, \"value\": \"abc\"}]",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "custom_fields"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "script_alias": "ticket_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "ticket_url",
+      "label": "Ticket URL",
+      "hint": "Agent-facing ticket URL.",
+      "data_type": "string",
+      "script_alias": "ticket_url",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "data_type": "string",
+      "script_alias": "status",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "created_at",
+      "label": "Created At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "string",
+      "script_alias": "created_at",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "name": "Update Ticket",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Changes fields on an existing ticket: status, priority, type, assignee, group, tags, or custom fields. Only the fields you set are changed.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_update_ticket",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "ticket_id"
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "status"
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "priority"
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "hint": "One of: problem, incident, question, task.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "type"
+    },
+    {
+      "name": "assignee_id",
+      "label": "Assignee ID",
+      "hint": "Numeric Zendesk agent ID.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "assignee_id"
+    },
+    {
+      "name": "group_id",
+      "label": "Group ID",
+      "hint": "Numeric Zendesk group ID.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "group_id"
+    },
+    {
+      "name": "tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags, e.g. vip,billing. What happens with them is controlled by Tag Mode.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "tags"
+    },
+    {
+      "name": "tag_mode",
+      "label": "Tag Mode",
+      "hint": "One of: set (replace all tags, default), add (append to existing tags), remove (remove from existing tags). Only applies when Tags is set.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "tag_mode"
+    },
+    {
+      "name": "custom_fields",
+      "label": "Custom Fields",
+      "hint": "JSON array string of custom field objects, e.g. [{\"id\": 360000123456, \"value\": \"abc\"}]",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "custom_fields"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "script_alias": "ticket_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "data_type": "string",
+      "script_alias": "status",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "updated_at",
+      "label": "Updated At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "string",
+      "script_alias": "updated_at",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

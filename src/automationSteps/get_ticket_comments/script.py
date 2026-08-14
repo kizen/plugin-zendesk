@@ -16,6 +16,20 @@ MAX_PAGES = 10
 # HELPERS
 
 
+def is_upstream_error(resp):
+    # The proxy sometimes returns its OWN 200 while wrapping a failed upstream call — e.g. a
+    # connection failure (bad/unreachable subdomain) comes back as {"status_code": 503,
+    # "response_headers": {}, "body": ""} with resp.ok True. Checking resp.ok alone misses this.
+    if not resp.ok:
+        return True
+    try:
+        payload = resp.json()
+    except Exception:
+        return False
+    status_code = payload.get("status_code") if isinstance(payload, dict) else None
+    return isinstance(status_code, int) and not (200 <= status_code < 300)
+
+
 def raise_zendesk_error(resp, context):
     # Kizen's proxy wraps a successful upstream call as {"status_code", "response_headers",
     # "body": <upstream response>} — a relayed Zendesk error lives at payload["body"]["error"]/
@@ -26,7 +40,8 @@ def raise_zendesk_error(resp, context):
     except Exception:
         raise Exception(f"Zendesk error {context}: unknown_error — HTTP {resp.status_code}")
 
-    body = payload.get("body")
+    upstream_status = payload.get("status_code", resp.status_code) if isinstance(payload, dict) else resp.status_code
+    body = payload.get("body") if isinstance(payload, dict) else None
     if isinstance(body, dict):
         error = body.get("error")
         description = body.get("description")
@@ -37,11 +52,11 @@ def raise_zendesk_error(resp, context):
                 message += f" — {description}"
             raise Exception(message)
 
-    kizen_error = payload.get("error") or payload.get("detail")
+    kizen_error = payload.get("error") or payload.get("detail") if isinstance(payload, dict) else None
     if kizen_error:
         raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
 
-    raise Exception(f"Zendesk error {context}: unknown_error — HTTP {resp.status_code}")
+    raise Exception(f"Zendesk error {context}: unknown_error — HTTP {upstream_status}")
 
 
 def zendesk_request_with_retry(method, url, **kwargs):
@@ -94,7 +109,7 @@ while True:
         f"{BASE_URL}/tickets/{ticket_id}/comments.json",
         params={"include": "users", "sort_order": "desc", "per_page": MAX_PER_PAGE, "page": page},
     )
-    if not resp.ok:
+    if is_upstream_error(resp):
         raise_zendesk_error(resp, "fetching ticket comments")
 
     payload = resp.json().get("body", {})

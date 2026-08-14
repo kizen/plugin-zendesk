@@ -21,7 +21,7 @@
       "required_entitlement": null,
       "auth_type": "oauth",
       "auth_level": "business",
-      "base_service_url": "https://{{zendesk_subdomain}}.zendesk.com/api/v2",
+      "base_service_url": "https://kizen-79102.zendesk.com/api/v2",
       "auth_credentials": {
         "client_id": "kizen_integration_dev",
         "client_secret": {

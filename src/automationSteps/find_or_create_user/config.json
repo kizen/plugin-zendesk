@@ -1,0 +1,112 @@
+{
+  "name": "Find or Create User",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Looks up a Zendesk end user by email, optionally creating them if no match exists.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_find_or_create_user",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "email",
+      "label": "Email",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable",
+      "script_alias": "email"
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "hint": "Required if Create If Missing is true and no user matches Email yet.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "name"
+    },
+    {
+      "name": "phone",
+      "label": "Phone",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "phone"
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "hint": "e.g. a Kizen contact ID, stored on the Zendesk user record for cross-referencing. Only used when creating a new user.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "external_id"
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "hint": "Numeric Zendesk organization ID. Only used when creating a new user.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "organization_id"
+    },
+    {
+      "name": "create_if_missing",
+      "label": "Create If Missing",
+      "hint": "If true and no user matches Email, creates one. Defaults to false — no user is created otherwise.",
+      "data_type": "boolean",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "create_if_missing"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "user_id",
+      "label": "User ID",
+      "data_type": "string",
+      "script_alias": "user_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "name",
+      "label": "Name",
+      "data_type": "string",
+      "script_alias": "name",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "email",
+      "label": "Email",
+      "data_type": "string",
+      "script_alias": "email",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "data_type": "string",
+      "script_alias": "organization_id",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "role",
+      "label": "Role",
+      "data_type": "string",
+      "script_alias": "role",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "was_created",
+      "label": "Was Created",
+      "data_type": "boolean",
+      "script_alias": "was_created",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

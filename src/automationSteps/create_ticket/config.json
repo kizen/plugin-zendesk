@@ -35,7 +35,7 @@
     {
       "name": "requester_name",
       "label": "Requester Name",
-      "hint": "Only used when Requester Email is also set.",
+      "hint": "Only used when Requester Email is also set. Effectively required if that email doesn't already exist in Zendesk — creating a new requester without a name fails.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -62,7 +62,7 @@
     {
       "name": "ticket_status",
       "label": "Status",
-      "hint": "One of: new, open, pending, hold, solved, closed. Zendesk defaults to open if omitted.",
+      "hint": "One of: new, open, pending, hold, solved, closed. Zendesk defaults to open if omitted. 'new' isn't guaranteed to stick (Zendesk may report back 'open' instead). 'pending' requires Assignee ID. 'hold' may fail on accounts with Custom Ticket Statuses enabled.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",

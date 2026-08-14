@@ -105,6 +105,12 @@ if status and status not in VALID_STATUSES:
     raise Exception(
         f"Zendesk error: invalid_status — must be one of {', '.join(sorted(VALID_STATUSES))}, got {status!r}."
     )
+# Confirmed empirically against a real account: "pending" requires an assignee, or Zendesk
+# rejects the whole ticket with a RecordInvalid error. Checked proactively here since it's a
+# deterministic rule that doesn't need an extra lookup — unlike the requester-name case above,
+# which depends on whether the requester already exists.
+if status == "pending" and not assignee_id:
+    raise Exception("Zendesk error: invalid_status — status 'pending' requires Assignee ID to be set.")
 
 ticket = {
     "subject": subject,

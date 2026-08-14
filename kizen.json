@@ -29,7 +29,7 @@
           "value": "eyJ2IjoxLCJhbGciOiJSU0EtT0FFUC0yNTYrQTI1NkdDTSIsImsiOiJvY1BzMkNkMktlZlZjMzJkeGtIaGk4WjA0M2wwbFhFT3NKWXNTMFNrWTkxVXZldEZXbCtoZWJMREsrR3JQUmN0ZUJjNEEvam5qZ3JyNklvTWxUeWZRNWt5RC9YbGhGZVVpQm9Mc1hzK0RqR3NTOVluaE5qa3M3NEEySU90T3crVVZIelNpWW9SSG91SEVNbGVlWTBxVFEzanMxaldodGZFNVZRclNKMnJJSnpFRkJRUmZVcE5PdXkvOXd4cFh4Y2RYNVZxYXBPNjA5OFZlMTRKdHRZYVhpeUdVNk9rZjdSVzZ0ampmMzVvZWloOTlDNXpsRU9SUmxsRFVrUTQ3MjBXTXZkb2I0d1lIWEo5ZHMvdFhkYVZIQXp2dHFyV0dqaWVpRndWcWxPSjZQTTNkSERqODl6Rms4WTREY0ptbkd6WHdrY09wcTRZNTJ4VStHRHR1T1FUNk1UNlZYREZRMTdkZHlOWVVjeGswNWpwWXoyZWFvYkF5WDJXalF3VnRLS2hZOTJSd01uZW90UDlDaFhWbjNra0ZyNFFpVHNYaDF6VFZONFJMT1Bjem50dnp4MlhlQ3dVMlpEUUsxSUprVnh2T1pEKy9YR0V2QjFXS1Q2L3NRVStDRzhSMy9yYW5rV3BZblp0QlFYOGdncXk5aXJoQTdxaXN5Mkt1YUVEM2lPUCIsIml2IjoiQm9rMEJnejFuazgybHdQRCIsInRhZyI6IjVDWjFWNUFpMTZIM08weVJNVFVjbmc9PSIsImN0IjoialJ1allTbFRpdW9PYXhlaDkzOUR3bXJtMDRCYThDSU1XVkdqWVM4cE9EQ284WWFhbnRrYXY3eUxsaWVHMFl2SndFNEZiQTRTQUhhemJ6cTFOREFMT1E9PSJ9"
         },
         "content_type": "application/json",
-        "scopes": "tickets:read tickets:write users:read users:write",
+        "scopes": "read tickets:read tickets:write users:read users:write",
         "authorize_url": "https://kizen-79102.zendesk.com/oauth/authorizations/new",
         "token_url": "https://kizen-79102.zendesk.com/oauth/tokens",
         "token_field_name": "access_token",

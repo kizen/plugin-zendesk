@@ -1,0 +1,127 @@
+{
+  "name": "Search Tickets",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Finds tickets by requester, status, priority, type, tags, organization, external ID, or date. Combine filters, or supply a raw Zendesk search query for full control.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_search_tickets",
+  "script": "script.py",
+  "inputs": [
+    {
+      "name": "requester_email",
+      "label": "Requester Email",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "requester_email"
+    },
+    {
+      "name": "ticket_status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "ticket_status"
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "priority"
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "hint": "One of: problem, incident, question, task.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "type"
+    },
+    {
+      "name": "ticket_tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags — matches tickets having ALL of these tags.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "ticket_tags"
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "hint": "Numeric Zendesk organization ID.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "organization_id"
+    },
+    {
+      "name": "created_after",
+      "label": "Created After",
+      "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "created_after"
+    },
+    {
+      "name": "updated_after",
+      "label": "Updated After",
+      "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "updated_after"
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "external_id"
+    },
+    {
+      "name": "raw_query",
+      "label": "Raw Query",
+      "hint": "Raw Zendesk search query fragment (see Zendesk's search syntax docs). If set, this REPLACES every filter above — combined only with a fixed type:ticket.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "raw_query"
+    },
+    {
+      "name": "limit",
+      "label": "Limit",
+      "hint": "Maximum number of matching tickets to return; paginates automatically to satisfy this. Zendesk caps search at 1,000 total results (100/page, 10 pages) — requests above that are clamped. Defaults to 100 if left unset.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "limit"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "tickets",
+      "label": "Tickets",
+      "hint": "JSON array string of matching tickets, each with id/subject/status/priority/requester_id/updated_at/ticket_url.",
+      "data_type": "string",
+      "script_alias": "tickets",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "count",
+      "label": "Count",
+      "hint": "Number of tickets included in Tickets.",
+      "data_type": "number",
+      "script_alias": "count",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

@@ -45,11 +45,21 @@ def raise_zendesk_error(resp, context):
     if isinstance(body, dict):
         error = body.get("error")
         description = body.get("description")
+        details = body.get("details")
         if error or description:
             label = error.get("title") if isinstance(error, dict) else error
             message = f"Zendesk error {context}: {label or 'unknown_error'}"
             if description:
                 message += f" — {description}"
+            if isinstance(details, dict) and details:
+                detail_bits = []
+                for field, issues in details.items():
+                    for issue in issues if isinstance(issues, list) else [issues]:
+                        text = issue.get("description") if isinstance(issue, dict) else str(issue)
+                        if text:
+                            detail_bits.append(f"{field}: {text}")
+                if detail_bits:
+                    message += " (" + "; ".join(detail_bits) + ")"
             raise Exception(message)
 
     kizen_error = payload.get("error") or payload.get("detail") if isinstance(payload, dict) else None

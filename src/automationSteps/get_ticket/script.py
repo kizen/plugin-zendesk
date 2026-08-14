@@ -83,10 +83,10 @@ def as_id_string(value):
 
 outputs.subject = ticket.get("subject") or ""
 outputs.description = ticket.get("description") or ""
-outputs.status = ticket.get("status") or ""
+outputs.ticket_status = ticket.get("status") or ""
 outputs.priority = ticket.get("priority") or ""
 outputs.type = ticket.get("type") or ""
-outputs.tags = ", ".join(ticket.get("tags") or [])
+outputs.ticket_tags = ", ".join(ticket.get("tags") or [])
 outputs.requester_email = requester_email
 outputs.requester_id = as_id_string(requester_id)
 outputs.assignee_id = as_id_string(ticket.get("assignee_id"))

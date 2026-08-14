@@ -61,8 +61,8 @@ requester_email = getattr(inputs, "requester_email", None)
 requester_name = getattr(inputs, "requester_name", None)
 priority = getattr(inputs, "priority", None)
 ticket_type = getattr(inputs, "type", None)
-status = getattr(inputs, "status", None)
-tags = getattr(inputs, "tags", None)
+status = getattr(inputs, "ticket_status", None)
+tags = getattr(inputs, "ticket_tags", None)
 assignee_id = getattr(inputs, "assignee_id", None)
 group_id = getattr(inputs, "group_id", None)
 external_id = getattr(inputs, "external_id", None)
@@ -144,5 +144,5 @@ if ticket_api_url and ticket_id is not None:
 
 outputs.ticket_id = str(ticket_id) if ticket_id is not None else ""
 outputs.ticket_url = agent_url
-outputs.status = result.get("status", "")
+outputs.ticket_status = result.get("status", "")
 outputs.created_at = result.get("created_at", "")

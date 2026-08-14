@@ -56,12 +56,12 @@ def zendesk_request_with_retry(method, url, **kwargs):
 # MAIN LOGIC
 
 ticket_id = inputs.ticket_id
-status = getattr(inputs, "status", None)
+status = getattr(inputs, "ticket_status", None)
 priority = getattr(inputs, "priority", None)
 ticket_type = getattr(inputs, "type", None)
 assignee_id = getattr(inputs, "assignee_id", None)
 group_id = getattr(inputs, "group_id", None)
-tags = getattr(inputs, "tags", None)
+tags = getattr(inputs, "ticket_tags", None)
 tag_mode = getattr(inputs, "tag_mode", None) or "set"
 custom_fields = getattr(inputs, "custom_fields", None)
 
@@ -134,5 +134,5 @@ if not resp.ok:
 result = resp.json().get("body", {}).get("ticket", {})
 
 outputs.ticket_id = str(result.get("id", ticket_id))
-outputs.status = result.get("status", "")
+outputs.ticket_status = result.get("status", "")
 outputs.updated_at = result.get("updated_at", "")

@@ -60,22 +60,22 @@
       "script_alias": "type"
     },
     {
-      "name": "status",
+      "name": "ticket_status",
       "label": "Status",
       "hint": "One of: new, open, pending, hold, solved, closed. Zendesk defaults to open if omitted.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
-      "script_alias": "status"
+      "script_alias": "ticket_status"
     },
     {
-      "name": "tags",
+      "name": "ticket_tags",
       "label": "Tags",
       "hint": "Comma-separated list of tags, e.g. vip,billing",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
-      "script_alias": "tags"
+      "script_alias": "ticket_tags"
     },
     {
       "name": "assignee_id",
@@ -133,10 +133,10 @@
       "create_field_options": false
     },
     {
-      "name": "status",
+      "name": "ticket_status",
       "label": "Status",
       "data_type": "string",
-      "script_alias": "status",
+      "script_alias": "ticket_status",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },

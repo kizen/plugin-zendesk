@@ -122,9 +122,9 @@ Builds a Zendesk search query string, always prefixed `type:ticket`. `raw_query`
 
 ### `find_or_create_user`
 
-**Inputs:** `email`\*, `name`, `phone`, `external_id`, `organization_id`, `create_if_missing` (boolean, default `false`).
+**Inputs:** `user_email`\*, `user_name`, `phone`, `external_id`, `organization_id`, `create_if_missing` (boolean, default `false`).
 
-**Outputs:** `user_id`, `name`, `email`, `organization_id`, `role`, `was_created`.
+**Outputs:** `user_id`, `user_name`, `user_email`, `organization_id`, `role`, `was_created`.
 
 Searches `GET /users/search.json?query=email:{email}` (exact field-scoped match, not fuzzy) and takes the first result. If nothing matches and `create_if_missing` is `true`, creates via `POST /users.json` — proactively validates `name` is set first (same lesson as Create Ticket's requester creation: Zendesk requires a name for any new user). If nothing matches and `create_if_missing` is `false` (the default), every output comes back blank/`false` rather than raising — "not found" is a valid, expected result here, not an error.
 
@@ -149,7 +149,7 @@ Per Zendesk's documented, plan-dependent limits: account-wide throughput ranges 
 
 - **OAuth refresh tokens die roughly every 60–90 minutes, and this is a platform bug, not something fixable from this repo.** Zendesk's refresh tokens are single-use/rotating — Zendesk's own docs confirm a successful refresh deletes both the previous access *and* refresh token. Kizen refreshes via a scheduled cron job (confirmed via a `"refreshed_via": "cron"` business event log), and the evidence strongly suggests that cron job doesn't persist the newly-rotated refresh token after a successful refresh, so the *next* refresh cycle fails using an already-invalidated token. Filed as a bug with the platform team. If a 503 `token_expired` shows up during development, just reconnect — don't re-diagnose it as a new issue.
 
-- **Reserved automation-step field names, undocumented anywhere accessible:** `status` and `tags` are rejected at publish time with `"API Name is reserved"` — not caught by any client-side validation. Worked around by prefixing to `ticket_status`/`ticket_tags` throughout. There may be other reserved words not yet discovered; if a future field name causes an inexplicable publish failure, check for this class of error first.
+- **Reserved automation-step field names, undocumented anywhere accessible:** `status`, `tags`, `email`, and `name` are all rejected at publish time with `"API Name is reserved"` — not caught by any client-side validation, and only surfaced on a real deploy (the plugin-wizard bot's staging publish step), not on `npx @kizenapps/cli build`. Worked around by prefixing: `ticket_status`/`ticket_tags` throughout, and `user_email`/`user_name` in Find or Create User. There may be other reserved words not yet discovered; if a future field name causes an inexplicable publish failure, check for this class of error first — the error response's `automation_action_configs` array is positional (alphabetical by automation step folder name) with per-input/per-output error objects, so match array indices back to that step's `inputs`/`outputs` order in `config.json` to find the offending field.
 
 - **`data_type: "number"` is unsafe for any optional input, full stop.** Leaving an optional `number`-typed field blank crashes the platform's own input-construction step (`KizenConversionError: Failed to convert value '' to float`) *before* your script ever runs — confirmed this happens regardless of whether a `default` is set (the `default`+`required: true` pairing used elsewhere on this platform does prevent it, but `default`+`required: false` does not). Every numeric-ish optional input in this plugin (`limit` on Search Tickets and Get Ticket Comments, `assignee_id`, `group_id`, `organization_id`) uses `data_type: "string"` and parses the int in script.py instead.
 

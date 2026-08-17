@@ -74,8 +74,8 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 # MAIN LOGIC
 
-email = inputs.email
-name = getattr(inputs, "name", None)
+email = inputs.user_email
+name = getattr(inputs, "user_name", None)
 phone = getattr(inputs, "phone", None)
 external_id = getattr(inputs, "external_id", None)
 organization_id = getattr(inputs, "organization_id", None)
@@ -120,8 +120,8 @@ if not user and create_if_missing:
 user_organization_id = user.get("organization_id") if user else None
 
 outputs.user_id = str(user.get("id")) if user and user.get("id") is not None else ""
-outputs.name = (user.get("name") if user else "") or ""
-outputs.email = (user.get("email") if user else "") or ""
+outputs.user_name = (user.get("name") if user else "") or ""
+outputs.user_email = (user.get("email") if user else "") or ""
 outputs.organization_id = str(user_organization_id) if user_organization_id is not None else ""
 outputs.role = (user.get("role") if user else "") or ""
 outputs.was_created = was_created

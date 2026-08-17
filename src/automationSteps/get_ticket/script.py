@@ -4,7 +4,8 @@ from urllib.parse import urlparse
 # NOTE: while this plugin's PR preview is live, api_name is preview-qualified
 # (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
 # plugin-wizard bot comment for the current value. Update once merged/published.
-BASE_URL = "/external-integrations/proxy/zendesk_preview_kzn_18120_spike_explore_zendesk_integration/zendesk_api"
+PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 # HELPERS
 
@@ -59,6 +60,19 @@ def raise_zendesk_error(resp, context):
     if kizen_error:
         raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
 
+    # TEMPORARY — surfaces the actual constructed/resolved base domain when the upstream
+    # response is a redirect (e.g. Zendesk's own root domain redirecting to www.zendesk.com
+    # when base_service_url has no real account subdomain). Without this, a 3xx just reports
+    # "unknown_error — HTTP 3xx" with no visibility into where it actually went. Remove once
+    # concluded testing base_service_url configurations.
+    response_headers = payload.get("response_headers", {}) if isinstance(payload, dict) else {}
+    redirect_location = response_headers.get("location") or response_headers.get("Location") if isinstance(response_headers, dict) else None
+    if redirect_location:
+        raise Exception(
+            f"Zendesk error {context}: unknown_error — HTTP {upstream_status}, "
+            f"constructed base domain redirected to: {redirect_location}"
+        )
+
     raise Exception(f"Zendesk error {context}: unknown_error — HTTP {upstream_status}")
 
 
@@ -77,7 +91,31 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 ticket_id = inputs.ticket_id
 
-resp = zendesk_request_with_retry(kizen.api.get, f"{BASE_URL}/tickets/{ticket_id}.json")
+# Read this business's configured Zendesk subdomain and build a full_domain override from it,
+# rather than relying on base_service_url's own (fixed, single-tenant) host. Config values
+# aren't reachable from any Python attribute (kizen.config/kizen.business_config don't exist)
+# but ARE reachable via this real Kizen platform endpoint — confirmed live. full_domain then
+# genuinely overrides the request's destination host per-call, e.g.
+# .../proxy/<plugin_api_name>/zendesk_api/api/v2/tickets/3.json?full_domain=<subdomain>.zendesk.com
+# Note the /api/v2 segment must be included explicitly here — a full_domain override doesn't
+# carry through base_service_url's own baked-in path prefix.
+business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
+if not business_config_resp.ok:
+    raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")
+
+zendesk_subdomain = (
+    business_config_resp.json().get("config", {}).get("__kizen_clean_config", {}).get("zendesk_subdomain")
+)
+if not zendesk_subdomain:
+    raise Exception("zendesk_subdomain is not configured for this business — set it in Configuration first.")
+
+full_domain = f"{zendesk_subdomain}.zendesk.com"
+
+resp = zendesk_request_with_retry(
+    kizen.api.get,
+    f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
+    params={"full_domain": full_domain},
+)
 if is_upstream_error(resp):
     raise_zendesk_error(resp, "fetching ticket")
 
@@ -89,7 +127,11 @@ ticket = resp.json().get("body", {}).get("ticket", {})
 requester_id = ticket.get("requester_id")
 requester_email = ""
 if requester_id:
-    user_resp = zendesk_request_with_retry(kizen.api.get, f"{BASE_URL}/users/{requester_id}.json")
+    user_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/users/{requester_id}.json",
+        params={"full_domain": full_domain},
+    )
     if not is_upstream_error(user_resp):
         requester_email = user_resp.json().get("body", {}).get("user", {}).get("email") or ""
 

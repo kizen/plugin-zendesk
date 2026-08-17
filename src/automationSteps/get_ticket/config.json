@@ -169,6 +169,15 @@
       "create_field_options": false
     },
     {
+      "name": "debug_regex_validation_test",
+      "label": "DEBUG Regex Validation Test",
+      "hint": "TEMPORARY diagnostic — passes a full_domain value that violates sub_domain_regex_validation's pattern, to see if it's actually enforced. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_regex_validation_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

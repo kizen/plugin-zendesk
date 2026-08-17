@@ -23,7 +23,7 @@
       "auth_level": "business",
       "base_service_url": "https://kizen-79102.zendesk.com/api/v2",
       "additional_service_urls": ["kizen-79102.zendesk.com"],
-      "sub_domain_regex_validation": "^[a-zA-Z0-9-]+\\.zendesk\\.com$",
+      "sub_domain_regex_validation": "^[a-zA-Z0-9-]+$",
       "auth_credentials": {
         "client_id": "kizen_integration_dev",
         "client_secret": {

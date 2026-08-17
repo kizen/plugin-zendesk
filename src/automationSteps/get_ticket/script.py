@@ -195,6 +195,27 @@ try:
 except Exception as exc:
     debug_dynamic_full_domain_test = f"failed: {exc}"
 
+# TEMPORARY diagnostic — the decisive test for whether sub_domain_regex_validation
+# ("^[a-zA-Z0-9-]+\.zendesk\.com$") is actually enforced now that it's genuinely deployed
+# (earlier full_domain tests all used *.zendesk.com-shaped hosts, so none of them could have
+# been rejected by this pattern even if it were live). This value deliberately does NOT match
+# — no ".zendesk.com" suffix at all. If Kizen's proxy rejects it with a distinct
+# validation-style error before ever attempting a network call, the regex is real enforcement.
+# If it still reaches out (even to fail at DNS/connection), the field is a no-op — consistent
+# with additional_service_urls' own observed lack of enforcement. Remove once concluded.
+try:
+    invalid_pattern_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
+        params={"full_domain": "not-a-zendesk-host.example.com"},
+    )
+    if is_upstream_error(invalid_pattern_resp):
+        raise_zendesk_error(invalid_pattern_resp, "sub_domain_regex_validation diagnostic (non-matching host)")
+    invalid_pattern_ticket = invalid_pattern_resp.json().get("body", {}).get("ticket", {})
+    debug_regex_validation_test = f"success (NOT rejected): subject={invalid_pattern_ticket.get('subject')!r}"
+except Exception as exc:
+    debug_regex_validation_test = f"failed/rejected: {exc}"
+
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
 # rather than failing the whole Get Ticket call over a secondary piece of data.
@@ -236,4 +257,5 @@ outputs.debug_full_domain_test = debug_full_domain_test  # TEMPORARY — remove 
 outputs.debug_config_test = debug_config_test  # TEMPORARY — remove with the block above
 outputs.debug_business_config_test = debug_business_config_test  # TEMPORARY — remove with the block above
 outputs.debug_dynamic_full_domain_test = debug_dynamic_full_domain_test  # TEMPORARY — remove with the block above
+outputs.debug_regex_validation_test = debug_regex_validation_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

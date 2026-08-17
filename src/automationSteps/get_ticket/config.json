@@ -142,6 +142,15 @@
       "create_field_options": false
     },
     {
+      "name": "debug_config_test",
+      "label": "DEBUG Config Test",
+      "hint": "TEMPORARY diagnostic — checks whether setup_assistant Configuration values are reachable from Python. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_config_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

@@ -86,18 +86,46 @@ ticket = resp.json().get("body", {}).get("ticket", {})
 # TEMPORARY diagnostic — testing the additional_service_urls/full_domain mechanism as a
 # candidate for per-business dynamic hosts. Does NOT touch the working fetch above; only
 # reports its own outcome. Remove this block once the experiment concludes either way.
+# Step 1 (proven): full_domain="kizen-79102.zendesk.com" (our enumerated host) succeeded.
+# Step 2 (this test): a host NOT listed in additional_service_urls at all — tells us whether
+# that list is an enforced whitelist (multi-tenant would need every subdomain pre-enumerated,
+# a non-starter) or full_domain accepts any value freely (which would solve the multi-tenant
+# problem outright, no sub_domain_regex_validation needed).
 try:
     full_domain_resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
-        params={"full_domain": "kizen-79102.zendesk.com"},
+        params={"full_domain": "nonexistent-subdomain-test-12345.zendesk.com"},
     )
     if is_upstream_error(full_domain_resp):
-        raise_zendesk_error(full_domain_resp, "full_domain diagnostic")
+        raise_zendesk_error(full_domain_resp, "full_domain diagnostic (unlisted host)")
     full_domain_ticket = full_domain_resp.json().get("body", {}).get("ticket", {})
     debug_full_domain_test = f"success: subject={full_domain_ticket.get('subject')!r}"
 except Exception as exc:
     debug_full_domain_test = f"failed: {exc}"
+
+# TEMPORARY diagnostic — checking whether setup_assistant Configuration values (e.g.
+# zendesk_subdomain) are reachable from a Python Code Step at all. The dev toolkit's
+# Configuration tab describes them as "exposed to plugin scripts at this.config" — that's
+# JS-surface language, but never directly tested from Python. Remove once concluded.
+config_debug_attempts = []
+try:
+    config_debug_attempts.append(f"global 'config' = {config!r}")
+except NameError as exc:
+    config_debug_attempts.append(f"global 'config' -> NameError: {exc}")
+try:
+    config_debug_attempts.append(f"kizen.config = {kizen.config!r}")
+except AttributeError as exc:
+    config_debug_attempts.append(f"kizen.config -> AttributeError: {exc}")
+except NameError as exc:
+    config_debug_attempts.append(f"kizen.config -> NameError: {exc}")
+try:
+    config_debug_attempts.append(f"kizen.business_config = {kizen.business_config!r}")
+except AttributeError as exc:
+    config_debug_attempts.append(f"kizen.business_config -> AttributeError: {exc}")
+except NameError as exc:
+    config_debug_attempts.append(f"kizen.business_config -> NameError: {exc}")
+debug_config_test = " | ".join(config_debug_attempts)
 
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
@@ -137,4 +165,5 @@ outputs.external_id = ticket.get("external_id") or ""
 outputs.created_at = ticket.get("created_at") or ""
 outputs.updated_at = ticket.get("updated_at") or ""
 outputs.debug_full_domain_test = debug_full_domain_test  # TEMPORARY — remove with the block above
+outputs.debug_config_test = debug_config_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

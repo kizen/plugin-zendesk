@@ -6,6 +6,11 @@ from urllib.parse import urlparse
 # plugin-wizard bot comment for the current value. Update once merged/published.
 BASE_URL = "/external-integrations/proxy/zendesk_preview_kzn_18120_spike_explore_zendesk_integration/zendesk_api"
 
+# TEMPORARY — throwaway second service (zendesk_wildcard_test in kizen.json) for testing
+# whether base_service_url itself can use a literal "*" wildcard for the subdomain. Remove
+# this constant and its diagnostics below once concluded.
+WILDCARD_BASE_URL = "/external-integrations/proxy/zendesk_preview_kzn_18120_spike_explore_zendesk_integration/zendesk_wildcard_test"
+
 # HELPERS
 
 
@@ -216,6 +221,42 @@ try:
 except Exception as exc:
     debug_regex_validation_test = f"failed/rejected: {exc}"
 
+# TEMPORARY diagnostic — does base_service_url itself accept a literal "*" wildcard for the
+# subdomain (zendesk_wildcard_test's base_service_url is "https://*.zendesk.com/api/v2")? No
+# full_domain override is passed here, so this call relies entirely on base_service_url
+# resolving on its own — if a wildcard isn't a resolvable host, expect a connection-level
+# failure of some kind (a distinct error shape from the ones above would tell us how the proxy
+# actually reacts to an unresolvable literal wildcard). Remove once concluded.
+try:
+    wildcard_no_override_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{WILDCARD_BASE_URL}/api/v2/tickets/{ticket_id}.json",
+    )
+    if is_upstream_error(wildcard_no_override_resp):
+        raise_zendesk_error(wildcard_no_override_resp, "wildcard base_service_url diagnostic (no full_domain override)")
+    wildcard_ticket = wildcard_no_override_resp.json().get("body", {}).get("ticket", {})
+    debug_wildcard_no_override_test = f"success: subject={wildcard_ticket.get('subject')!r}"
+except Exception as exc:
+    debug_wildcard_no_override_test = f"failed: {exc}"
+
+# TEMPORARY diagnostic — same wildcarded base_service_url, but THIS time with an explicit
+# full_domain override (our own real subdomain). Tests whether a "*" in base_service_url acts
+# as an implicit allow-pattern that full_domain can then concretize, the same way
+# additional_service_urls' enumerated hosts do today — without needing additional_service_urls
+# declared at all on this throwaway service. Remove once concluded.
+try:
+    wildcard_with_override_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{WILDCARD_BASE_URL}/api/v2/tickets/{ticket_id}.json",
+        params={"full_domain": "kizen-79102.zendesk.com"},
+    )
+    if is_upstream_error(wildcard_with_override_resp):
+        raise_zendesk_error(wildcard_with_override_resp, "wildcard base_service_url diagnostic (with full_domain override)")
+    wildcard_override_ticket = wildcard_with_override_resp.json().get("body", {}).get("ticket", {})
+    debug_wildcard_with_override_test = f"success: subject={wildcard_override_ticket.get('subject')!r}"
+except Exception as exc:
+    debug_wildcard_with_override_test = f"failed: {exc}"
+
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
 # rather than failing the whole Get Ticket call over a secondary piece of data.
@@ -258,4 +299,6 @@ outputs.debug_config_test = debug_config_test  # TEMPORARY — remove with the b
 outputs.debug_business_config_test = debug_business_config_test  # TEMPORARY — remove with the block above
 outputs.debug_dynamic_full_domain_test = debug_dynamic_full_domain_test  # TEMPORARY — remove with the block above
 outputs.debug_regex_validation_test = debug_regex_validation_test  # TEMPORARY — remove with the block above
+outputs.debug_wildcard_no_override_test = debug_wildcard_no_override_test  # TEMPORARY — remove with the block above
+outputs.debug_wildcard_with_override_test = debug_wildcard_with_override_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

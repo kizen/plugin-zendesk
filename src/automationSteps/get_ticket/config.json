@@ -178,6 +178,24 @@
       "create_field_options": false
     },
     {
+      "name": "debug_wildcard_no_override_test",
+      "label": "DEBUG Wildcard No-Override Test",
+      "hint": "TEMPORARY diagnostic — calls the throwaway zendesk_wildcard_test service (base_service_url with a literal '*' subdomain) with no full_domain override. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_wildcard_no_override_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "debug_wildcard_with_override_test",
+      "label": "DEBUG Wildcard With-Override Test",
+      "hint": "TEMPORARY diagnostic — same wildcarded service, but with an explicit full_domain override to our real subdomain. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_wildcard_with_override_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

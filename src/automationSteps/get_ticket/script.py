@@ -127,6 +127,24 @@ except NameError as exc:
     config_debug_attempts.append(f"kizen.business_config -> NameError: {exc}")
 debug_config_test = " | ".join(config_debug_attempts)
 
+# TEMPORARY diagnostic — a coworker (Eric Ravet) pointed to a DIFFERENT mechanism than the
+# three attribute-access attempts above: a Kizen-internal platform API endpoint,
+# /api/external-integrations/business-plugin-apps/{plugin_api_name}, called like any other
+# kizen.api request rather than read off a Python global. This is a genuinely separate
+# candidate for reading setup_assistant Configuration values from a Python Code Step — the
+# earlier debug_config_test failures don't rule this out, since they only tested attribute
+# access, never an actual HTTP call to this route. Remove this block once concluded.
+try:
+    business_config_resp = kizen.api.get(
+        "/api/external-integrations/business-plugin-apps/zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+    )
+    if business_config_resp.ok:
+        debug_business_config_test = f"success (HTTP {business_config_resp.status_code}): {business_config_resp.text[:1500]}"
+    else:
+        debug_business_config_test = f"failed: HTTP {business_config_resp.status_code} — {business_config_resp.text[:500]}"
+except Exception as exc:
+    debug_business_config_test = f"failed: {exc}"
+
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
 # rather than failing the whole Get Ticket call over a secondary piece of data.
@@ -166,4 +184,5 @@ outputs.created_at = ticket.get("created_at") or ""
 outputs.updated_at = ticket.get("updated_at") or ""
 outputs.debug_full_domain_test = debug_full_domain_test  # TEMPORARY — remove with the block above
 outputs.debug_config_test = debug_config_test  # TEMPORARY — remove with the block above
+outputs.debug_business_config_test = debug_business_config_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

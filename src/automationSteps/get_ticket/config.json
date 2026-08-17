@@ -151,6 +151,15 @@
       "create_field_options": false
     },
     {
+      "name": "debug_business_config_test",
+      "label": "DEBUG Business Config Test",
+      "hint": "TEMPORARY diagnostic — tries reading business plugin config via the /api/external-integrations/business-plugin-apps/{plugin_api_name} endpoint. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_business_config_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

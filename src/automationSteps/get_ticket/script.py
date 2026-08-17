@@ -222,12 +222,15 @@ except Exception as exc:
     debug_regex_validation_test = f"failed/rejected: {exc}"
 
 # TEMPORARY diagnostic — a literal "*" wildcard in base_service_url was tested and disproven
-# (rejected as "URL has an invalid label" without a full_domain override). Per a coworker,
-# the actual supported pattern is leaving base_service_url as the bare ROOT domain instead
-# ("zendesk.com", no scheme, no subdomain — zendesk_wildcard_test's base_service_url now
-# reflects this). No full_domain override is passed here, so this call relies entirely on
-# base_service_url resolving on its own — tells us whether a bare root domain alone is
-# resolvable, or still needs full_domain to supply a real host. Remove once concluded.
+# (rejected as "URL has an invalid label" without a full_domain override). A bare root domain
+# ("zendesk.com", no scheme, no subdomain) was tried next and got a generic 500 instead — not
+# yet confirmed deterministic vs. transient (the same class of message an earlier genuinely
+# transient 502 also produced). zendesk_wildcard_test's base_service_url now adds the /api/v2
+# path too ("zendesk.com/api/v2"), to see whether the error changes at all — this call's own
+# path ALSO appends /api/v2 (needed for full_domain overrides, which don't carry through
+# base_service_url's baked-in path), so a duplicated /api/v2/api/v2 segment is expected here,
+# not a fix. Still missing a URL scheme either way — that's the leading suspect for whatever's
+# actually crashing. Remove once concluded.
 try:
     wildcard_no_override_resp = zendesk_request_with_retry(
         kizen.api.get,

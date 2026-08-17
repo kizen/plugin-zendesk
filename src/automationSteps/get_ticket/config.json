@@ -180,7 +180,7 @@
     {
       "name": "debug_wildcard_no_override_test",
       "label": "DEBUG Wildcard No-Override Test",
-      "hint": "TEMPORARY diagnostic — calls the throwaway zendesk_wildcard_test service (base_service_url left as the bare root domain 'zendesk.com') with no full_domain override. Remove before merge.",
+      "hint": "TEMPORARY diagnostic — calls the throwaway zendesk_wildcard_test service (base_service_url = 'zendesk.com/api/v2', no scheme) with no full_domain override. Remove before merge.",
       "data_type": "string",
       "script_alias": "debug_wildcard_no_override_test",
       "conflict_resolution": "overwrite",

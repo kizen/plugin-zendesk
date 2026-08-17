@@ -83,6 +83,22 @@ if is_upstream_error(resp):
 
 ticket = resp.json().get("body", {}).get("ticket", {})
 
+# TEMPORARY diagnostic — testing the additional_service_urls/full_domain mechanism as a
+# candidate for per-business dynamic hosts. Does NOT touch the working fetch above; only
+# reports its own outcome. Remove this block once the experiment concludes either way.
+try:
+    full_domain_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
+        params={"full_domain": "kizen-79102.zendesk.com"},
+    )
+    if is_upstream_error(full_domain_resp):
+        raise_zendesk_error(full_domain_resp, "full_domain diagnostic")
+    full_domain_ticket = full_domain_resp.json().get("body", {}).get("ticket", {})
+    debug_full_domain_test = f"success: subject={full_domain_ticket.get('subject')!r}"
+except Exception as exc:
+    debug_full_domain_test = f"failed: {exc}"
+
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
 # rather than failing the whole Get Ticket call over a secondary piece of data.
@@ -120,4 +136,5 @@ outputs.organization_id = as_id_string(ticket.get("organization_id"))
 outputs.external_id = ticket.get("external_id") or ""
 outputs.created_at = ticket.get("created_at") or ""
 outputs.updated_at = ticket.get("updated_at") or ""
+outputs.debug_full_domain_test = debug_full_domain_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

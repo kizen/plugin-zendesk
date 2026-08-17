@@ -133,6 +133,15 @@
       "create_field_options": false
     },
     {
+      "name": "debug_full_domain_test",
+      "label": "DEBUG Full Domain Test",
+      "hint": "TEMPORARY diagnostic for the additional_service_urls/full_domain experiment. Remove before merge.",
+      "data_type": "string",
+      "script_alias": "debug_full_domain_test",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

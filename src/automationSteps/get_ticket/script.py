@@ -129,21 +129,71 @@ debug_config_test = " | ".join(config_debug_attempts)
 
 # TEMPORARY diagnostic — a coworker (Eric Ravet) pointed to a DIFFERENT mechanism than the
 # three attribute-access attempts above: a Kizen-internal platform API endpoint,
-# /api/external-integrations/business-plugin-apps/{plugin_api_name}, called like any other
+# external-integrations/business-plugin-apps/{plugin_api_name}, called like any other
 # kizen.api request rather than read off a Python global. This is a genuinely separate
 # candidate for reading setup_assistant Configuration values from a Python Code Step — the
 # earlier debug_config_test failures don't rule this out, since they only tested attribute
-# access, never an actual HTTP call to this route. Remove this block once concluded.
+# access, never an actual HTTP call to this route. Per developer.kizen.com's Service Accounts
+# doc, kizen.api's root URL already bakes in "/api" — pass only the path after that, matching
+# the doc's own "/custom-objects" example — so no leading "/api" segment here (a first attempt
+# with one 404'd). That doc also separately confirms "a service account can export business
+# config but cannot import it," consistent with this being a real, sanctioned read path.
+# Remove this block once concluded.
+business_config_payload = None
 try:
     business_config_resp = kizen.api.get(
-        "/api/external-integrations/business-plugin-apps/zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+        "/external-integrations/business-plugin-apps/zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
     )
     if business_config_resp.ok:
-        debug_business_config_test = f"success (HTTP {business_config_resp.status_code}): {business_config_resp.text[:1500]}"
+        business_config_payload = business_config_resp.json()
+        top_level_keys = list(business_config_payload.keys()) if isinstance(business_config_payload, dict) else None
+        non_plugin_app_view = (
+            {k: v for k, v in business_config_payload.items() if k != "plugin_app"}
+            if isinstance(business_config_payload, dict)
+            else business_config_payload
+        )
+        debug_business_config_test = (
+            f"success (HTTP {business_config_resp.status_code}); top-level keys: {top_level_keys}; "
+            f"non-plugin_app content: {non_plugin_app_view}"
+        )
     else:
         debug_business_config_test = f"failed: HTTP {business_config_resp.status_code} — {business_config_resp.text[:500]}"
 except Exception as exc:
     debug_business_config_test = f"failed: {exc}"
+
+# TEMPORARY diagnostic — chains the two mechanisms above: read this business's own configured
+# zendesk_subdomain (via the business-plugin-apps call just above) and build a `full_domain`
+# value FROM it dynamically, instead of the hardcoded "kizen-79102.zendesk.com" used in the
+# earlier full_domain tests. This is the real candidate mechanism for per-business host
+# routing — a per-call override built in script.py, not a change to base_service_url itself
+# (which is resolved by the deployed proxy before script.py ever runs, the same static layer
+# that already defeated {{fieldKey}} templating). kizen.json's zendesk_api service now also
+# declares sub_domain_regex_validation ("wildcard" pattern matching any *.zendesk.com host) so
+# this is a declared, intentional capability rather than relying on an undocumented gap in
+# additional_service_urls enforcement. Remove this block once concluded.
+try:
+    clean_config = (
+        (business_config_payload or {}).get("config", {}).get("__kizen_clean_config", {})
+        if isinstance(business_config_payload, dict)
+        else {}
+    )
+    dynamic_subdomain = clean_config.get("zendesk_subdomain")
+    if not dynamic_subdomain:
+        raise Exception(f"zendesk_subdomain not found in business config: {clean_config!r}")
+    dynamic_full_domain = f"{dynamic_subdomain}.zendesk.com"
+    dynamic_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
+        params={"full_domain": dynamic_full_domain},
+    )
+    if is_upstream_error(dynamic_resp):
+        raise_zendesk_error(dynamic_resp, "dynamic full_domain diagnostic")
+    dynamic_ticket = dynamic_resp.json().get("body", {}).get("ticket", {})
+    debug_dynamic_full_domain_test = (
+        f"success: dynamic_full_domain={dynamic_full_domain!r}, subject={dynamic_ticket.get('subject')!r}"
+    )
+except Exception as exc:
+    debug_dynamic_full_domain_test = f"failed: {exc}"
 
 # The ticket object only carries requester_id, not the requester's email — a second lookup
 # against the user record is required. If that lookup fails, leave requester_email blank
@@ -185,4 +235,5 @@ outputs.updated_at = ticket.get("updated_at") or ""
 outputs.debug_full_domain_test = debug_full_domain_test  # TEMPORARY — remove with the block above
 outputs.debug_config_test = debug_config_test  # TEMPORARY — remove with the block above
 outputs.debug_business_config_test = debug_business_config_test  # TEMPORARY — remove with the block above
+outputs.debug_dynamic_full_domain_test = debug_dynamic_full_domain_test  # TEMPORARY — remove with the block above
 outputs.ticket_url = agent_url

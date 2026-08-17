@@ -222,15 +222,16 @@ except Exception as exc:
     debug_regex_validation_test = f"failed/rejected: {exc}"
 
 # TEMPORARY diagnostic — a literal "*" wildcard in base_service_url was tested and disproven
-# (rejected as "URL has an invalid label" without a full_domain override). A bare root domain
-# ("zendesk.com", no scheme, no subdomain) was tried next and got a generic 500 instead — not
-# yet confirmed deterministic vs. transient (the same class of message an earlier genuinely
-# transient 502 also produced). zendesk_wildcard_test's base_service_url now adds the /api/v2
-# path too ("zendesk.com/api/v2"), to see whether the error changes at all — this call's own
-# path ALSO appends /api/v2 (needed for full_domain overrides, which don't carry through
-# base_service_url's baked-in path), so a duplicated /api/v2/api/v2 segment is expected here,
-# not a fix. Still missing a URL scheme either way — that's the leading suspect for whatever's
-# actually crashing. Remove once concluded.
+# (rejected as "URL has an invalid label" without a full_domain override). Two bare-root-domain
+# variants without a scheme ("zendesk.com" and "zendesk.com/api/v2") both then failed with the
+# IDENTICAL generic 500 ("An error occurred. Please try again later...") — same message across
+# two different path contents is real signal this is deterministic, not transient, but it
+# doesn't yet distinguish "missing scheme is the cause" from "this is a catch-all handler that
+# would say this for any internal error." zendesk_wildcard_test's base_service_url now adds the
+# scheme ("https://zendesk.com/api/v2") to isolate that specifically — if this succeeds or
+# fails differently, scheme-presence is confirmed as the differentiator; if it fails
+# identically, a bare root domain (no subdomain) is the real problem, unrelated to scheme.
+# Remove once concluded.
 try:
     wildcard_no_override_resp = zendesk_request_with_retry(
         kizen.api.get,

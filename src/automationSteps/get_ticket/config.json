@@ -133,69 +133,6 @@
       "create_field_options": false
     },
     {
-      "name": "debug_full_domain_test",
-      "label": "DEBUG Full Domain Test",
-      "hint": "TEMPORARY diagnostic for the additional_service_urls/full_domain experiment. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_full_domain_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_config_test",
-      "label": "DEBUG Config Test",
-      "hint": "TEMPORARY diagnostic — checks whether setup_assistant Configuration values are reachable from Python. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_config_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_business_config_test",
-      "label": "DEBUG Business Config Test",
-      "hint": "TEMPORARY diagnostic — tries reading business plugin config via the /api/external-integrations/business-plugin-apps/{plugin_api_name} endpoint. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_business_config_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_dynamic_full_domain_test",
-      "label": "DEBUG Dynamic Full Domain Test",
-      "hint": "TEMPORARY diagnostic — builds full_domain from the business config's zendesk_subdomain value and re-fetches the ticket through it. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_dynamic_full_domain_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_regex_validation_test",
-      "label": "DEBUG Regex Validation Test",
-      "hint": "TEMPORARY diagnostic — passes a full_domain value that violates sub_domain_regex_validation's pattern, to see if it's actually enforced. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_regex_validation_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_wildcard_no_override_test",
-      "label": "DEBUG Wildcard No-Override Test",
-      "hint": "TEMPORARY diagnostic — calls the throwaway zendesk_wildcard_test service (base_service_url = 'https://zendesk.com/api/v2', bare root domain but with a scheme) with no full_domain override. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_wildcard_no_override_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
-      "name": "debug_wildcard_with_override_test",
-      "label": "DEBUG Wildcard With-Override Test",
-      "hint": "TEMPORARY diagnostic — same bare-root-domain service, but with an explicit full_domain override to our real subdomain. Remove before merge.",
-      "data_type": "string",
-      "script_alias": "debug_wildcard_with_override_test",
-      "conflict_resolution": "overwrite",
-      "create_field_options": false
-    },
-    {
       "name": "ticket_url",
       "label": "Ticket URL",
       "hint": "Agent-facing ticket URL.",

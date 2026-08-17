@@ -221,12 +221,13 @@ try:
 except Exception as exc:
     debug_regex_validation_test = f"failed/rejected: {exc}"
 
-# TEMPORARY diagnostic — does base_service_url itself accept a literal "*" wildcard for the
-# subdomain (zendesk_wildcard_test's base_service_url is "https://*.zendesk.com/api/v2")? No
-# full_domain override is passed here, so this call relies entirely on base_service_url
-# resolving on its own — if a wildcard isn't a resolvable host, expect a connection-level
-# failure of some kind (a distinct error shape from the ones above would tell us how the proxy
-# actually reacts to an unresolvable literal wildcard). Remove once concluded.
+# TEMPORARY diagnostic — a literal "*" wildcard in base_service_url was tested and disproven
+# (rejected as "URL has an invalid label" without a full_domain override). Per a coworker,
+# the actual supported pattern is leaving base_service_url as the bare ROOT domain instead
+# ("zendesk.com", no scheme, no subdomain — zendesk_wildcard_test's base_service_url now
+# reflects this). No full_domain override is passed here, so this call relies entirely on
+# base_service_url resolving on its own — tells us whether a bare root domain alone is
+# resolvable, or still needs full_domain to supply a real host. Remove once concluded.
 try:
     wildcard_no_override_resp = zendesk_request_with_retry(
         kizen.api.get,
@@ -239,9 +240,9 @@ try:
 except Exception as exc:
     debug_wildcard_no_override_test = f"failed: {exc}"
 
-# TEMPORARY diagnostic — same wildcarded base_service_url, but THIS time with an explicit
-# full_domain override (our own real subdomain). Tests whether a "*" in base_service_url acts
-# as an implicit allow-pattern that full_domain can then concretize, the same way
+# TEMPORARY diagnostic — same bare-root-domain base_service_url, but THIS time with an
+# explicit full_domain override (our own real subdomain). Tests whether a bare root domain
+# acts as an implicit allow-pattern that full_domain can then concretize, the same way
 # additional_service_urls' enumerated hosts do today — without needing additional_service_urls
 # declared at all on this throwaway service. Remove once concluded.
 try:

@@ -5,6 +5,7 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_search_tickets",
   "script": "script.py",
+  "secrets": ["zendesk_subdomain"],
   "inputs": [
     {
       "name": "requester_email",

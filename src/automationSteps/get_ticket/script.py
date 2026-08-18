@@ -92,19 +92,18 @@ def zendesk_request_with_retry(method, url, **kwargs):
 ticket_id = inputs.ticket_id
 
 # Build a full_domain override from this business's own zendesk_subdomain secret — the SAME
-# secret already used to template authorize_url/token_url in kizen.json — rather than a second,
-# separate setup_assistant Configuration field or an extra HTTP call. This step's config.json
-# now declares the secret under "base_config": {"secrets": [...]} (matching kizen.json's own
-# base_config shape) rather than a flat "secrets": [...] array — a prior attempt with the flat
-# array failed coderunner pre-execution validation ("Secret '...' not found or invalid"); this
-# is a genuinely different declaration shape, worth testing on its own merits. Secrets are
-# injected as a flat dict; the exact key prefix isn't reliably the plain kizen.json api_name
+# secret name used to template authorize_url/token_url in kizen.json, but a DISTINCT value
+# registration: automation-step secrets (declared via config.json's flat "secrets": [...],
+# matching plugin-mysql/plugin-kitchen-sink's convention) are Integration Secrets, resolved
+# separately from whatever store backs {{secret.<key>}} manifest templating. The declaration
+# shape was never the issue — the fix was registering an Integration Secret value under this
+# name specifically. The exact injected key prefix isn't reliably the plain kizen.json api_name
 # (varies with preview-qualification, same as BASE_URL elsewhere in this plugin) — match by
 # suffix instead, the same defensive approach plugin-mysql uses.
-subdomain_secret_key = next(iter(key for key in secrets if key.endswith("zendesk_subdomain")), None)
-zendesk_subdomain = secrets[subdomain_secret_key] if subdomain_secret_key else None
-if not zendesk_subdomain:
+subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
+if not subdomain_secret_key:
     raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")
+zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 

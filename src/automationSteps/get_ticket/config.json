@@ -5,9 +5,7 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_get_ticket",
   "script": "script.py",
-  "base_config": {
-    "secrets": ["zendesk_subdomain"]
-  },
+  "secrets": ["zendesk_subdomain"],
   "inputs": [
     {
       "name": "ticket_id",

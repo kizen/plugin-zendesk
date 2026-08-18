@@ -5,6 +5,7 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_get_ticket_comments",
   "script": "script.py",
+  "secrets": ["zendesk_subdomain"],
   "inputs": [
     {
       "name": "ticket_id",

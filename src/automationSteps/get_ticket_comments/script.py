@@ -106,18 +106,15 @@ else:
     if target_count < 1:
         raise Exception("Zendesk error: invalid_limit — must be at least 1.")
 
-# Read this business's configured Zendesk subdomain and build a full_domain override from it,
-# rather than relying on base_service_url's own (fixed, single-tenant) host. See get_ticket's
-# script.py for the fuller explanation of this mechanism and its limits.
-business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
-if not business_config_resp.ok:
-    raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")
-
-zendesk_subdomain = (
-    business_config_resp.json().get("config", {}).get("__kizen_clean_config", {}).get("zendesk_subdomain")
-)
-if not zendesk_subdomain:
-    raise Exception("zendesk_subdomain is not configured for this business — set it in Configuration first.")
+# Build a full_domain override from this business's own zendesk_subdomain Integration Secret —
+# the same secret NAME used to template authorize_url/token_url in kizen.json, but a distinct
+# value registration (see get_ticket's script.py for the fuller explanation). Declared in this
+# step's config.json via the flat "secrets": [...] array. Match by suffix since the injected
+# key prefix isn't reliably the plain kizen.json api_name (varies with preview-qualification).
+subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
+if not subdomain_secret_key:
+    raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")
+zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 

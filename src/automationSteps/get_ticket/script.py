@@ -99,6 +99,15 @@ ticket_id = inputs.ticket_id
 # .../proxy/<plugin_api_name>/zendesk_api/api/v2/tickets/3.json?full_domain=<subdomain>.zendesk.com
 # Note the /api/v2 segment must be included explicitly here — a full_domain override doesn't
 # carry through base_service_url's own baked-in path prefix.
+#
+# (An attempt to source this from the same zendesk_subdomain SECRET used for authorize_url/
+# token_url templating — reading it directly via Python's injected `secrets` dict instead of
+# this HTTP call — hit an unresolved platform-side gap: automation-step `secrets: []`
+# declarations fail pre-execution validation with "Secret '...' not found or invalid" even
+# though the identical secret name resolves fine for `{{secret.<key>}}` OAuth templating.
+# These appear to be two genuinely different secret stores despite sharing one declaration in
+# kizen.json's base_config.secrets — needs direct platform-team input, not more local
+# workarounds. Reverted to this proven-working approach.)
 business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
 if not business_config_resp.ok:
     raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")

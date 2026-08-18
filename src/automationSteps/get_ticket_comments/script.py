@@ -4,7 +4,8 @@ from datetime import datetime
 # NOTE: while this plugin's PR preview is live, api_name is preview-qualified
 # (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
 # plugin-wizard bot comment for the current value. Update once merged/published.
-BASE_URL = "/external-integrations/proxy/zendesk_preview_kzn_18120_spike_explore_zendesk_integration/zendesk_api"
+PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 MAX_PER_PAGE = 100
 DEFAULT_LIMIT = 100
@@ -105,6 +106,21 @@ else:
     if target_count < 1:
         raise Exception("Zendesk error: invalid_limit — must be at least 1.")
 
+# Read this business's configured Zendesk subdomain and build a full_domain override from it,
+# rather than relying on base_service_url's own (fixed, single-tenant) host. See get_ticket's
+# script.py for the fuller explanation of this mechanism and its limits.
+business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
+if not business_config_resp.ok:
+    raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")
+
+zendesk_subdomain = (
+    business_config_resp.json().get("config", {}).get("__kizen_clean_config", {}).get("zendesk_subdomain")
+)
+if not zendesk_subdomain:
+    raise Exception("zendesk_subdomain is not configured for this business — set it in Configuration first.")
+
+full_domain = f"{zendesk_subdomain}.zendesk.com"
+
 # sort_order=desc gets each page newest-first, so the first pages are always the MOST RECENT
 # comments — reversed below into chronological order for the transcript. include=users
 # side-loads every author's name on every page instead of a lookup per distinct commenter.
@@ -116,8 +132,14 @@ page = 1
 while True:
     resp = zendesk_request_with_retry(
         kizen.api.get,
-        f"{BASE_URL}/tickets/{ticket_id}/comments.json",
-        params={"include": "users", "sort_order": "desc", "per_page": MAX_PER_PAGE, "page": page},
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}/comments.json",
+        params={
+            "include": "users",
+            "sort_order": "desc",
+            "per_page": MAX_PER_PAGE,
+            "page": page,
+            "full_domain": full_domain,
+        },
     )
     if is_upstream_error(resp):
         raise_zendesk_error(resp, "fetching ticket comments")

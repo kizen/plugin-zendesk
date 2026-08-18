@@ -3,7 +3,8 @@ import time
 # NOTE: while this plugin's PR preview is live, api_name is preview-qualified
 # (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
 # plugin-wizard bot comment for the current value. Update once merged/published.
-BASE_URL = "/external-integrations/proxy/zendesk_preview_kzn_18120_spike_explore_zendesk_integration/zendesk_api"
+PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 # HELPERS
 
@@ -81,10 +82,25 @@ external_id = getattr(inputs, "external_id", None)
 organization_id = getattr(inputs, "organization_id", None)
 create_if_missing = bool(getattr(inputs, "create_if_missing", False))
 
+# Read this business's configured Zendesk subdomain and build a full_domain override from it,
+# rather than relying on base_service_url's own (fixed, single-tenant) host. See get_ticket's
+# script.py for the fuller explanation of this mechanism and its limits.
+business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
+if not business_config_resp.ok:
+    raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")
+
+zendesk_subdomain = (
+    business_config_resp.json().get("config", {}).get("__kizen_clean_config", {}).get("zendesk_subdomain")
+)
+if not zendesk_subdomain:
+    raise Exception("zendesk_subdomain is not configured for this business — set it in Configuration first.")
+
+full_domain = f"{zendesk_subdomain}.zendesk.com"
+
 resp = zendesk_request_with_retry(
     kizen.api.get,
-    f"{BASE_URL}/users/search.json",
-    params={"query": f"email:{email}"},
+    f"{BASE_URL}/api/v2/users/search.json",
+    params={"query": f"email:{email}", "full_domain": full_domain},
 )
 if is_upstream_error(resp):
     raise_zendesk_error(resp, "searching for user")
@@ -110,7 +126,12 @@ if not user and create_if_missing:
         except ValueError:
             raise Exception(f"Zendesk error: invalid_organization_id — must be numeric, got {organization_id!r}.")
 
-    create_resp = zendesk_request_with_retry(kizen.api.post, f"{BASE_URL}/users.json", json={"user": new_user})
+    create_resp = zendesk_request_with_retry(
+        kizen.api.post,
+        f"{BASE_URL}/api/v2/users.json",
+        json={"user": new_user},
+        params={"full_domain": full_domain},
+    )
     if is_upstream_error(create_resp):
         raise_zendesk_error(create_resp, "creating user")
 

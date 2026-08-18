@@ -1,9 +1,7 @@
 import time
 from urllib.parse import urlparse
 
-# NOTE: while this plugin's PR preview is live, api_name is preview-qualified
-# (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
-# plugin-wizard bot comment for the current value. Update once merged/published.
+# Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
 PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
 BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
@@ -11,9 +9,7 @@ BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 
 def is_upstream_error(resp):
-    # The proxy sometimes returns its OWN 200 while wrapping a failed upstream call — e.g. a
-    # connection failure (bad/unreachable subdomain) comes back as {"status_code": 503,
-    # "response_headers": {}, "body": ""} with resp.ok True. Checking resp.ok alone misses this.
+    # Proxy can return its own 200 while wrapping a failed upstream call (e.g. status_code 503 in the body).
     if not resp.ok:
         return True
     try:
@@ -25,10 +21,6 @@ def is_upstream_error(resp):
 
 
 def raise_zendesk_error(resp, context):
-    # Kizen's proxy wraps a successful upstream call as {"status_code", "response_headers",
-    # "body": <upstream response>} — a relayed Zendesk error lives at payload["body"]["error"]/
-    # ["description"]. A proxy-level error (routing/auth/content-type) is Kizen's own flat,
-    # unwrapped shape.
     try:
         payload = resp.json()
     except Exception:
@@ -60,19 +52,6 @@ def raise_zendesk_error(resp, context):
     if kizen_error:
         raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
 
-    # TEMPORARY — surfaces the actual constructed/resolved base domain when the upstream
-    # response is a redirect (e.g. Zendesk's own root domain redirecting to www.zendesk.com
-    # when base_service_url has no real account subdomain). Without this, a 3xx just reports
-    # "unknown_error — HTTP 3xx" with no visibility into where it actually went. Remove once
-    # concluded testing base_service_url configurations.
-    response_headers = payload.get("response_headers", {}) if isinstance(payload, dict) else {}
-    redirect_location = response_headers.get("location") or response_headers.get("Location") if isinstance(response_headers, dict) else None
-    if redirect_location:
-        raise Exception(
-            f"Zendesk error {context}: unknown_error — HTTP {upstream_status}, "
-            f"constructed base domain redirected to: {redirect_location}"
-        )
-
     raise Exception(f"Zendesk error {context}: unknown_error — HTTP {upstream_status}")
 
 
@@ -91,15 +70,7 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 ticket_id = inputs.ticket_id
 
-# Build a full_domain override from this business's own zendesk_subdomain secret — the SAME
-# secret name used to template authorize_url/token_url in kizen.json, but a DISTINCT value
-# registration: automation-step secrets (declared via config.json's flat "secrets": [...],
-# matching plugin-mysql/plugin-kitchen-sink's convention) are Integration Secrets, resolved
-# separately from whatever store backs {{secret.<key>}} manifest templating. The declaration
-# shape was never the issue — the fix was registering an Integration Secret value under this
-# name specifically. The exact injected key prefix isn't reliably the plain kizen.json api_name
-# (varies with preview-qualification, same as BASE_URL elsewhere in this plugin) — match by
-# suffix instead, the same defensive approach plugin-mysql uses.
+# zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
 if not subdomain_secret_key:
     raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")
@@ -117,9 +88,7 @@ if is_upstream_error(resp):
 
 ticket = resp.json().get("body", {}).get("ticket", {})
 
-# The ticket object only carries requester_id, not the requester's email — a second lookup
-# against the user record is required. If that lookup fails, leave requester_email blank
-# rather than failing the whole Get Ticket call over a secondary piece of data.
+# Ticket object only carries requester_id; a second lookup resolves email, left blank on failure.
 requester_id = ticket.get("requester_id")
 requester_email = ""
 if requester_id:
@@ -131,8 +100,7 @@ if requester_id:
     if not is_upstream_error(user_resp):
         requester_email = user_resp.json().get("body", {}).get("user", {}).get("email") or ""
 
-# Same host-derivation approach as Create Ticket's ticket_url — avoids hardcoding our dev
-# subdomain, so this keeps working if base_service_url ever moves to a per-business value.
+# Agent-facing URL derived from Zendesk's own returned host rather than a hardcoded subdomain.
 agent_url = ""
 ticket_api_url = ticket.get("url", "")
 if ticket_api_url:

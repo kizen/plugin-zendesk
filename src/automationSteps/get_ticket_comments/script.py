@@ -1,26 +1,19 @@
 import time
 from datetime import datetime
 
-# NOTE: while this plugin's PR preview is live, api_name is preview-qualified
-# (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
-# plugin-wizard bot comment for the current value. Update once merged/published.
+# Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
 PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
 BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 MAX_PER_PAGE = 100
 DEFAULT_LIMIT = 100
-# Safety cap on pagination, not a Zendesk API limit — keeps this step within its execution
-# time budget on pathologically long tickets. 10 pages * 100/page = 1000 comments, which
-# happens to match the cap Zendesk itself documents for other list endpoints (e.g. Search).
-MAX_PAGES = 10
+MAX_PAGES = 10  # Safety cap on execution time, not a Zendesk limit — 10 * 100/page = 1000 comments.
 
 # HELPERS
 
 
 def is_upstream_error(resp):
-    # The proxy sometimes returns its OWN 200 while wrapping a failed upstream call — e.g. a
-    # connection failure (bad/unreachable subdomain) comes back as {"status_code": 503,
-    # "response_headers": {}, "body": ""} with resp.ok True. Checking resp.ok alone misses this.
+    # Proxy can return its own 200 while wrapping a failed upstream call (e.g. status_code 503 in the body).
     if not resp.ok:
         return True
     try:
@@ -32,10 +25,6 @@ def is_upstream_error(resp):
 
 
 def raise_zendesk_error(resp, context):
-    # Kizen's proxy wraps a successful upstream call as {"status_code", "response_headers",
-    # "body": <upstream response>} — a relayed Zendesk error lives at payload["body"]["error"]/
-    # ["description"]. A proxy-level error (routing/auth/content-type) is Kizen's own flat,
-    # unwrapped shape.
     try:
         payload = resp.json()
     except Exception:
@@ -106,11 +95,7 @@ else:
     if target_count < 1:
         raise Exception("Zendesk error: invalid_limit — must be at least 1.")
 
-# Build a full_domain override from this business's own zendesk_subdomain Integration Secret —
-# the same secret NAME used to template authorize_url/token_url in kizen.json, but a distinct
-# value registration (see get_ticket's script.py for the fuller explanation). Declared in this
-# step's config.json via the flat "secrets": [...] array. Match by suffix since the injected
-# key prefix isn't reliably the plain kizen.json api_name (varies with preview-qualification).
+# zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
 if not subdomain_secret_key:
     raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")
@@ -118,11 +103,8 @@ zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 
-# sort_order=desc gets each page newest-first, so the first pages are always the MOST RECENT
-# comments — reversed below into chronological order for the transcript. include=users
-# side-loads every author's name on every page instead of a lookup per distinct commenter.
-# Pages are fetched until target_count is satisfied (post Public Only filtering), a page
-# comes back short (no more pages), or MAX_PAGES is hit.
+# Pages fetched newest-first (reversed below for the transcript) until target_count is satisfied,
+# a page comes back short, or MAX_PAGES is hit. include=users side-loads author names in one pass.
 comments = []
 users_by_id = {}
 page = 1

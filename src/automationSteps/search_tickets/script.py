@@ -3,9 +3,7 @@ import time
 from datetime import datetime
 from urllib.parse import urlparse
 
-# NOTE: while this plugin's PR preview is live, api_name is preview-qualified
-# (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
-# plugin-wizard bot comment for the current value. Update once merged/published.
+# Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
 PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
 BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
@@ -15,17 +13,14 @@ VALID_TYPES = {"problem", "incident", "question", "task"}
 
 MAX_PER_PAGE = 100
 DEFAULT_LIMIT = 100
-# Zendesk's own hard cap on /search: 100/page * 10 pages — a 422 beyond this, not a Kizen limit.
-MAX_RESULTS = 1000
+MAX_RESULTS = 1000  # Zendesk's own hard cap on /search (100/page * 10 pages) — 422s beyond this.
 MAX_PAGES = MAX_RESULTS // MAX_PER_PAGE
 
 # HELPERS
 
 
 def is_upstream_error(resp):
-    # The proxy sometimes returns its OWN 200 while wrapping a failed upstream call — e.g. a
-    # connection failure (bad/unreachable subdomain) comes back as {"status_code": 503,
-    # "response_headers": {}, "body": ""} with resp.ok True. Checking resp.ok alone misses this.
+    # Proxy can return its own 200 while wrapping a failed upstream call (e.g. status_code 503 in the body).
     if not resp.ok:
         return True
     try:
@@ -37,10 +32,6 @@ def is_upstream_error(resp):
 
 
 def raise_zendesk_error(resp, context):
-    # Kizen's proxy wraps a successful upstream call as {"status_code", "response_headers",
-    # "body": <upstream response>} — a relayed Zendesk error lives at payload["body"]["error"]/
-    # ["description"]. A proxy-level error (routing/auth/content-type) is Kizen's own flat,
-    # unwrapped shape.
     try:
         payload = resp.json()
     except Exception:
@@ -87,8 +78,7 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 
 def as_search_date(value, label):
-    # Zendesk's search date filters only support date-level granularity (YYYY-MM-DD), so
-    # accept either a bare date or an ISO datetime and just take the date portion.
+    # Zendesk's search date filters are date-only (YYYY-MM-DD) — accept a bare date or ISO datetime.
     if not value:
         return None
     date_part = value[:10]
@@ -138,8 +128,7 @@ else:
 target_count = min(target_count, MAX_RESULTS)
 
 if raw_query:
-    # Scoped to tickets regardless — this action always returns tickets, so a raw fragment
-    # is combined with a fixed type:ticket rather than trusted to specify its own object type.
+    # Always scoped to tickets — a raw fragment is combined with a fixed type:ticket, not trusted alone.
     query = f"type:ticket {raw_query}"
 else:
     clauses = ["type:ticket"]
@@ -165,11 +154,7 @@ else:
         clauses.append(f"external_id:{external_id}")
     query = " ".join(clauses)
 
-# Build a full_domain override from this business's own zendesk_subdomain Integration Secret —
-# the same secret NAME used to template authorize_url/token_url in kizen.json, but a distinct
-# value registration (see get_ticket's script.py for the fuller explanation). Declared in this
-# step's config.json via the flat "secrets": [...] array. Match by suffix since the injected
-# key prefix isn't reliably the plain kizen.json api_name (varies with preview-qualification).
+# zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
 if not subdomain_secret_key:
     raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")

@@ -1,9 +1,7 @@
 import json
 import time
 
-# NOTE: while this plugin's PR preview is live, api_name is preview-qualified
-# (zendesk_preview_<branch-slug>) instead of the plain "zendesk" — see the PR's
-# plugin-wizard bot comment for the current value. Update once merged/published.
+# Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
 PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
 BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
@@ -16,9 +14,7 @@ VALID_TAG_MODES = {"set", "add", "remove"}
 
 
 def is_upstream_error(resp):
-    # The proxy sometimes returns its OWN 200 while wrapping a failed upstream call — e.g. a
-    # connection failure (bad/unreachable subdomain) comes back as {"status_code": 503,
-    # "response_headers": {}, "body": ""} with resp.ok True. Checking resp.ok alone misses this.
+    # Proxy can return its own 200 while wrapping a failed upstream call (e.g. status_code 503 in the body).
     if not resp.ok:
         return True
     try:
@@ -30,10 +26,6 @@ def is_upstream_error(resp):
 
 
 def raise_zendesk_error(resp, context):
-    # Kizen's proxy wraps a successful upstream call as {"status_code", "response_headers",
-    # "body": <upstream response>} — a relayed Zendesk error lives at payload["body"]["error"]/
-    # ["description"]. A proxy-level error (routing/auth/content-type) is Kizen's own flat,
-    # unwrapped shape.
     try:
         payload = resp.json()
     except Exception:
@@ -131,9 +123,7 @@ if group_id:
 
 if tags:
     tag_list = [t.strip() for t in tags.split(",") if t.strip()]
-    # Zendesk's ticket-update payload has three distinct tag fields depending on desired
-    # behavior: "tags" replaces the full set, "additional_tags"/"remove_tags" are update-only
-    # convenience fields that add/remove without touching the rest.
+    # "tags" replaces the full set; "additional_tags"/"remove_tags" add/remove without touching the rest.
     if tag_mode == "set":
         ticket["tags"] = tag_list
     elif tag_mode == "add":
@@ -153,11 +143,7 @@ if custom_fields:
 if not ticket:
     raise Exception("Zendesk error: no_fields_to_update — set at least one field besides Ticket ID.")
 
-# Build a full_domain override from this business's own zendesk_subdomain Integration Secret —
-# the same secret NAME used to template authorize_url/token_url in kizen.json, but a distinct
-# value registration (see get_ticket's script.py for the fuller explanation). Declared in this
-# step's config.json via the flat "secrets": [...] array. Match by suffix since the injected
-# key prefix isn't reliably the plain kizen.json api_name (varies with preview-qualification).
+# zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
 if not subdomain_secret_key:
     raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")

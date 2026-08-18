@@ -91,32 +91,20 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 ticket_id = inputs.ticket_id
 
-# Read this business's configured Zendesk subdomain and build a full_domain override from it,
-# rather than relying on base_service_url's own (fixed, single-tenant) host. Config values
-# aren't reachable from any Python attribute (kizen.config/kizen.business_config don't exist)
-# but ARE reachable via this real Kizen platform endpoint — confirmed live. full_domain then
-# genuinely overrides the request's destination host per-call, e.g.
-# .../proxy/<plugin_api_name>/zendesk_api/api/v2/tickets/3.json?full_domain=<subdomain>.zendesk.com
-# Note the /api/v2 segment must be included explicitly here — a full_domain override doesn't
-# carry through base_service_url's own baked-in path prefix.
-#
-# (An attempt to source this from the same zendesk_subdomain SECRET used for authorize_url/
-# token_url templating — reading it directly via Python's injected `secrets` dict instead of
-# this HTTP call — hit an unresolved platform-side gap: automation-step `secrets: []`
-# declarations fail pre-execution validation with "Secret '...' not found or invalid" even
-# though the identical secret name resolves fine for `{{secret.<key>}}` OAuth templating.
-# These appear to be two genuinely different secret stores despite sharing one declaration in
-# kizen.json's base_config.secrets — needs direct platform-team input, not more local
-# workarounds. Reverted to this proven-working approach.)
-business_config_resp = kizen.api.get(f"/external-integrations/business-plugin-apps/{PLUGIN_API_NAME}")
-if not business_config_resp.ok:
-    raise Exception(f"Failed to read business config: HTTP {business_config_resp.status_code}")
-
-zendesk_subdomain = (
-    business_config_resp.json().get("config", {}).get("__kizen_clean_config", {}).get("zendesk_subdomain")
-)
+# Build a full_domain override from this business's own zendesk_subdomain secret — the SAME
+# secret already used to template authorize_url/token_url in kizen.json — rather than a second,
+# separate setup_assistant Configuration field or an extra HTTP call. This step's config.json
+# now declares the secret under "base_config": {"secrets": [...]} (matching kizen.json's own
+# base_config shape) rather than a flat "secrets": [...] array — a prior attempt with the flat
+# array failed coderunner pre-execution validation ("Secret '...' not found or invalid"); this
+# is a genuinely different declaration shape, worth testing on its own merits. Secrets are
+# injected as a flat dict; the exact key prefix isn't reliably the plain kizen.json api_name
+# (varies with preview-qualification, same as BASE_URL elsewhere in this plugin) — match by
+# suffix instead, the same defensive approach plugin-mysql uses.
+subdomain_secret_key = next(iter(key for key in secrets if key.endswith("zendesk_subdomain")), None)
+zendesk_subdomain = secrets[subdomain_secret_key] if subdomain_secret_key else None
 if not zendesk_subdomain:
-    raise Exception("zendesk_subdomain is not configured for this business — set it in Configuration first.")
+    raise Exception("zendesk_subdomain secret is not set for this business — set it before running this action.")
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 

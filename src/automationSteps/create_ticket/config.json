@@ -9,7 +9,8 @@
   "inputs": [
     {
       "name": "subject",
-      "label": "Subject",
+      "label": "Ticket Title",
+      "hint": "The ticket's title, shown in Zendesk's ticket list and notifications.",
       "data_type": "string",
       "required": true,
       "input_source": "variable",
@@ -17,8 +18,8 @@
     },
     {
       "name": "comment_body",
-      "label": "Comment",
-      "hint": "The initial comment body — becomes the ticket's description.",
+      "label": "Description",
+      "hint": "Becomes the ticket's description and initial public comment.",
       "data_type": "string",
       "required": true,
       "input_source": "variable",
@@ -53,7 +54,7 @@
     },
     {
       "name": "type",
-      "label": "Type",
+      "label": "Ticket Type",
       "hint": "One of: problem, incident, question, task.",
       "data_type": "string",
       "required": false,
@@ -63,7 +64,7 @@
     {
       "name": "ticket_status",
       "label": "Status",
-      "hint": "One of: new, open, pending, hold, solved, closed. Zendesk defaults to open if omitted. 'new' isn't guaranteed to stick (Zendesk may report back 'open' instead). 'pending' requires Assignee ID. 'hold' may fail on accounts with Custom Ticket Statuses enabled.",
+      "hint": "One of: new, open, pending, hold, solved, closed. Defaults to open. 'pending' requires Assignee ID. 'new' may come back as 'open'; 'hold' may fail if Custom Ticket Statuses is enabled on your account.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -81,7 +82,7 @@
     {
       "name": "assignee_id",
       "label": "Assignee ID",
-      "hint": "Numeric Zendesk agent ID.",
+      "hint": "Numeric Zendesk agent ID — visible in the agent's profile URL in Zendesk Admin Center (Team members).",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -90,7 +91,7 @@
     {
       "name": "group_id",
       "label": "Group ID",
-      "hint": "Numeric Zendesk group ID.",
+      "hint": "Numeric Zendesk group ID — visible in the group's URL under Admin Center → People → Groups.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",

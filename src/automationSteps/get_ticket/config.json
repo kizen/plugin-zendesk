@@ -19,7 +19,7 @@
   "outputs": [
     {
       "name": "subject",
-      "label": "Subject",
+      "label": "Ticket Title",
       "data_type": "string",
       "script_alias": "subject",
       "conflict_resolution": "overwrite",
@@ -36,6 +36,7 @@
     {
       "name": "ticket_status",
       "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed.",
       "data_type": "string",
       "script_alias": "ticket_status",
       "conflict_resolution": "overwrite",
@@ -44,6 +45,7 @@
     {
       "name": "priority",
       "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
       "data_type": "string",
       "script_alias": "priority",
       "conflict_resolution": "overwrite",
@@ -51,7 +53,8 @@
     },
     {
       "name": "type",
-      "label": "Type",
+      "label": "Ticket Type",
+      "hint": "One of: problem, incident, question, task.",
       "data_type": "string",
       "script_alias": "type",
       "conflict_resolution": "overwrite",

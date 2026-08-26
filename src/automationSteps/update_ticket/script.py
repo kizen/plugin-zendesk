@@ -8,7 +8,6 @@ BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 VALID_PRIORITIES = {"urgent", "high", "normal", "low"}
 VALID_TYPES = {"problem", "incident", "question", "task"}
 VALID_STATUSES = {"new", "open", "pending", "hold", "solved", "closed"}
-VALID_TAG_MODES = {"set", "add", "remove"}
 
 # HELPERS
 
@@ -80,7 +79,8 @@ ticket_type = getattr(inputs, "type", None)
 assignee_id = getattr(inputs, "assignee_id", None)
 group_id = getattr(inputs, "group_id", None)
 tags = getattr(inputs, "ticket_tags", None)
-tag_mode = getattr(inputs, "tag_mode", None) or "set"
+add_tags = getattr(inputs, "add_tags", None)
+add_tags = True if add_tags is None else bool(add_tags)
 custom_fields = getattr(inputs, "custom_fields", None)
 
 if priority and priority not in VALID_PRIORITIES:
@@ -94,10 +94,6 @@ if ticket_type and ticket_type not in VALID_TYPES:
 if status and status not in VALID_STATUSES:
     raise Exception(
         f"Zendesk error: invalid_status — must be one of {', '.join(sorted(VALID_STATUSES))}, got {status!r}."
-    )
-if tag_mode not in VALID_TAG_MODES:
-    raise Exception(
-        f"Zendesk error: invalid_tag_mode — must be one of {', '.join(sorted(VALID_TAG_MODES))}, got {tag_mode!r}."
     )
 
 ticket = {}
@@ -123,10 +119,8 @@ if group_id:
 
 if tags:
     tag_list = [t.strip() for t in tags.split(",") if t.strip()]
-    # "tags" replaces the full set; "additional_tags"/"remove_tags" add/remove without touching the rest.
-    if tag_mode == "set":
-        ticket["tags"] = tag_list
-    elif tag_mode == "add":
+    # "additional_tags"/"remove_tags" add/remove specific tags without touching the rest.
+    if add_tags:
         ticket["additional_tags"] = tag_list
     else:
         ticket["remove_tags"] = tag_list

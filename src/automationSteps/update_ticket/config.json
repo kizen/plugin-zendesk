@@ -35,7 +35,7 @@
     },
     {
       "name": "type",
-      "label": "Type",
+      "label": "Ticket Type",
       "hint": "One of: problem, incident, question, task.",
       "data_type": "string",
       "required": false,
@@ -45,7 +45,7 @@
     {
       "name": "assignee_id",
       "label": "Assignee ID",
-      "hint": "Numeric Zendesk agent ID.",
+      "hint": "Numeric Zendesk agent ID — visible in the agent's profile URL in Zendesk Admin Center (Team members).",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -54,7 +54,7 @@
     {
       "name": "group_id",
       "label": "Group ID",
-      "hint": "Numeric Zendesk group ID.",
+      "hint": "Numeric Zendesk group ID — visible in the group's URL under Admin Center → People → Groups.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -63,20 +63,20 @@
     {
       "name": "ticket_tags",
       "label": "Tags",
-      "hint": "Comma-separated list of tags, e.g. vip,billing. What happens with them is controlled by Tag Mode.",
+      "hint": "Comma-separated list of tags, e.g. vip,billing. Whether they're added or removed is controlled by Add Tags.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
       "script_alias": "ticket_tags"
     },
     {
-      "name": "tag_mode",
-      "label": "Tag Mode",
-      "hint": "One of: set (replace all tags, default), add (append to existing tags), remove (remove from existing tags). Only applies when Tags is set.",
-      "data_type": "string",
+      "name": "add_tags",
+      "label": "Add Tags (Remove = No)",
+      "hint": "true adds the listed Tags to the ticket (default); false removes them instead. Only applies when Tags is set. Existing tags not listed are always left untouched either way.",
+      "data_type": "boolean",
       "required": false,
       "input_source": "variable",
-      "script_alias": "tag_mode"
+      "script_alias": "add_tags"
     },
     {
       "name": "custom_fields",

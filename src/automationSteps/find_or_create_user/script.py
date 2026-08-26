@@ -67,12 +67,15 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 # MAIN LOGIC
 
-email = inputs.user_email
+email = getattr(inputs, "user_email", None)
 name = getattr(inputs, "user_name", None)
 phone = getattr(inputs, "phone", None)
 external_id = getattr(inputs, "external_id", None)
 organization_id = getattr(inputs, "organization_id", None)
 create_if_missing = bool(getattr(inputs, "create_if_missing", False))
+
+if not (external_id or email or name):
+    raise Exception("Zendesk error: missing_search_key — provide at least one of External ID, Email, or Name to search by.")
 
 # zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
@@ -82,13 +85,35 @@ zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 
-resp = zendesk_request_with_retry(
-    kizen.api.get,
-    f"{BASE_URL}/api/v2/users/search.json",
-    params={"query": f"email:{email}", "full_domain": full_domain},
-)
+# Precedence when more than one is set: External ID > Email > Name. Combining them into a single
+# query isn't right — Zendesk ANDs search terms together, so slightly-mismatched fields would
+# silently return zero matches instead of using whichever field the caller actually meant.
+if external_id:
+    # Dedicated list-with-filter endpoint, not the general search endpoint — a precise match on a
+    # field Zendesk guarantees is unique per account, rather than a fuzzy/scoped search query.
+    resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/users.json",
+        params={"external_id": external_id, "full_domain": full_domain},
+    )
+    search_context = "searching for user by external ID"
+elif email:
+    resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/users/search.json",
+        params={"query": f"email:{email}", "full_domain": full_domain},
+    )
+    search_context = "searching for user by email"
+else:
+    resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/users/search.json",
+        params={"query": f"name:{name}", "full_domain": full_domain},
+    )
+    search_context = "searching for user by name"
+
 if is_upstream_error(resp):
-    raise_zendesk_error(resp, "searching for user")
+    raise_zendesk_error(resp, search_context)
 
 users = resp.json().get("body", {}).get("users") or []
 user = users[0] if users else None
@@ -96,9 +121,11 @@ was_created = False
 
 if not user and create_if_missing:
     if not name:  # Zendesk requires a name to create any new user.
-        raise Exception("Zendesk error: invalid_name — Name is required to create a new user (no existing user matched Email).")
+        raise Exception("Zendesk error: invalid_name — Name is required to create a new user (no existing user matched).")
 
-    new_user = {"email": email, "name": name}
+    new_user = {"name": name}
+    if email:
+        new_user["email"] = email
     if phone:
         new_user["phone"] = phone
     if external_id:

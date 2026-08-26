@@ -26,8 +26,8 @@
     },
     {
       "name": "is_public",
-      "label": "Public",
-      "hint": "False posts an internal note instead of a public reply.",
+      "label": "Is Public Comment",
+      "hint": "True posts a public reply, visible to the requester; false posts an internal note, visible only to agents.",
       "data_type": "boolean",
       "required": true,
       "input_source": "variable",
@@ -63,7 +63,7 @@
     },
     {
       "name": "is_public",
-      "label": "Public",
+      "label": "Is Public Comment",
       "data_type": "boolean",
       "script_alias": "is_public",
       "conflict_resolution": "overwrite",

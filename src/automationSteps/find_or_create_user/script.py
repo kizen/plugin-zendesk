@@ -54,6 +54,16 @@ def raise_zendesk_error(resp, context):
     raise Exception(f"Zendesk error {context}: unknown_error — HTTP {upstream_status}")
 
 
+def upstream_status_code(resp):
+    try:
+        payload = resp.json()
+    except Exception:
+        return resp.status_code
+    if isinstance(payload, dict) and isinstance(payload.get("status_code"), int):
+        return payload["status_code"]
+    return resp.status_code
+
+
 def zendesk_request_with_retry(method, url, **kwargs):
     resp = method(url, **kwargs)
     if resp.status_code == 429:
@@ -67,6 +77,7 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 # MAIN LOGIC
 
+zendesk_user_id = getattr(inputs, "zendesk_user_id", None)
 email = getattr(inputs, "user_email", None)
 name = getattr(inputs, "user_name", None)
 phone = getattr(inputs, "phone", None)
@@ -74,8 +85,10 @@ external_id = getattr(inputs, "external_id", None)
 organization_id = getattr(inputs, "organization_id", None)
 create_if_missing = bool(getattr(inputs, "create_if_missing", False))
 
-if not (external_id or email or name):
-    raise Exception("Zendesk error: missing_search_key — provide at least one of External ID, Email, or Name to search by.")
+if not (zendesk_user_id or external_id or email or name):
+    raise Exception(
+        "Zendesk error: missing_search_key — provide at least one of Zendesk User ID, External ID, Email, or Name to search by."
+    )
 
 # zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)
@@ -85,38 +98,49 @@ zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 
-# Precedence when more than one is set: External ID > Email > Name. Combining them into a single
-# query isn't right — Zendesk ANDs search terms together, so slightly-mismatched fields would
-# silently return zero matches instead of using whichever field the caller actually meant.
-if external_id:
-    # Dedicated list-with-filter endpoint, not the general search endpoint — a precise match on a
-    # field Zendesk guarantees is unique per account, rather than a fuzzy/scoped search query.
+# Precedence when more than one is set: Zendesk User ID > External ID > Email > Name — not combined into one query, since Zendesk ANDs terms together.
+if zendesk_user_id:
+    # Direct record fetch by Zendesk's primary key; a 404 means no match, not a fatal error.
+    resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/users/{zendesk_user_id}.json",
+        params={"full_domain": full_domain},
+    )
+    if is_upstream_error(resp) and upstream_status_code(resp) != 404:
+        raise_zendesk_error(resp, "searching for user by Zendesk User ID")
+    user = resp.json().get("body", {}).get("user") if not is_upstream_error(resp) else None
+elif external_id:
+    # Dedicated list-with-filter endpoint — a precise match, unlike the general search endpoint below.
     resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/users.json",
         params={"external_id": external_id, "full_domain": full_domain},
     )
-    search_context = "searching for user by external ID"
+    if is_upstream_error(resp):
+        raise_zendesk_error(resp, "searching for user by external ID")
+    users = resp.json().get("body", {}).get("users") or []
+    user = users[0] if users else None
 elif email:
     resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/users/search.json",
         params={"query": f"email:{email}", "full_domain": full_domain},
     )
-    search_context = "searching for user by email"
+    if is_upstream_error(resp):
+        raise_zendesk_error(resp, "searching for user by email")
+    users = resp.json().get("body", {}).get("users") or []
+    user = users[0] if users else None
 else:
     resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/users/search.json",
         params={"query": f"name:{name}", "full_domain": full_domain},
     )
-    search_context = "searching for user by name"
+    if is_upstream_error(resp):
+        raise_zendesk_error(resp, "searching for user by name")
+    users = resp.json().get("body", {}).get("users") or []
+    user = users[0] if users else None
 
-if is_upstream_error(resp):
-    raise_zendesk_error(resp, search_context)
-
-users = resp.json().get("body", {}).get("users") or []
-user = users[0] if users else None
 was_created = False
 
 if not user and create_if_missing:

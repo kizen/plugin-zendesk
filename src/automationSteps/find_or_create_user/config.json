@@ -1,16 +1,25 @@
 {
   "name": "Find or Create User",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
-  "action_description": "Looks up a Zendesk end user by External ID, email, or name (in that priority order), optionally creating them if no match exists.",
+  "action_description": "Looks up a Zendesk end user by Zendesk User ID, External ID, email, or name (in that priority order), optionally creating them if no match exists.",
   "runtime": "python-3-13",
   "action_type": "zendesk_find_or_create_user",
   "script": "script.py",
   "secrets": ["zendesk_subdomain"],
   "inputs": [
     {
+      "name": "zendesk_user_id",
+      "label": "Zendesk User ID",
+      "hint": "Zendesk's own internal numeric user ID (not External ID — see that field for the distinction). Highest-priority search key — a direct, unambiguous record fetch, checked before External ID, Email, or Name.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable",
+      "script_alias": "zendesk_user_id"
+    },
+    {
       "name": "external_id",
       "label": "External ID",
-      "hint": "e.g. a Kizen contact ID, stored on the Zendesk user record for cross-referencing. Highest-priority search key — used to find an existing user (via Zendesk's guaranteed-unique external ID lookup) before Email or Name are considered. Also stored on the record when creating a new user.",
+      "hint": "e.g. a Kizen contact ID, stored on the Zendesk user record for cross-referencing. Used to find an existing user (via Zendesk's guaranteed-unique external ID lookup) if Zendesk User ID isn't set, before Email or Name are considered. Also stored on the record when creating a new user.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -19,7 +28,7 @@
     {
       "name": "user_email",
       "label": "Email",
-      "hint": "Used to find an existing user if External ID isn't set, or create one if Create If Missing is enabled.",
+      "hint": "Used to find an existing user if neither Zendesk User ID nor External ID is set, or create one if Create If Missing is enabled.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
@@ -28,7 +37,7 @@
     {
       "name": "user_name",
       "label": "Name",
-      "hint": "Lowest-priority search key — only used to find a user if neither External ID nor Email is set. Required if Create If Missing is true and no user matches yet.",
+      "hint": "Lowest-priority search key — only used to find a user if none of Zendesk User ID, External ID, or Email is set. Required if Create If Missing is true and no user matches yet.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",

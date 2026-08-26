@@ -103,8 +103,7 @@ zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 
-# Pages fetched newest-first (reversed below for the transcript) until target_count is satisfied,
-# a page comes back short, or MAX_PAGES is hit. include=users side-loads author names in one pass.
+# Pages fetched newest-first (reversed below) until target_count is met or a page falls short; include=users side-loads author names.
 comments = []
 users_by_id = {}
 page = 1

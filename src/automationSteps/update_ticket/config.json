@@ -61,19 +61,19 @@
       "script_alias": "group_id"
     },
     {
-      "name": "ticket_tags",
-      "label": "Tags",
-      "hint": "Comma-separated list of tags, e.g. vip,billing. Whether they're added or removed is controlled by Remove Tags.",
+      "name": "add_tags",
+      "label": "Add Tags",
+      "hint": "Comma-separated list of tags to add, e.g. vip,billing. Existing tags not listed are left untouched. Zendesk does not allow adding tags on a closed ticket.",
       "data_type": "string",
       "required": false,
       "input_source": "variable",
-      "script_alias": "ticket_tags"
+      "script_alias": "add_tags"
     },
     {
       "name": "remove_tags",
-      "label": "Remove Tags (Add = No)",
-      "hint": "false adds the listed Tags to the ticket (default); true removes them instead. Only applies when Tags is set. Existing tags not listed are always left untouched either way. Zendesk does not allow adding or removing tags on a closed ticket.",
-      "data_type": "boolean",
+      "label": "Remove Tags",
+      "hint": "Comma-separated list of tags to remove, e.g. vip,billing. Tags not listed are left untouched. Zendesk does not allow removing tags on a closed ticket.",
+      "data_type": "string",
       "required": false,
       "input_source": "variable",
       "script_alias": "remove_tags"

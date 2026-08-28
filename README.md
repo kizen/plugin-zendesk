@@ -66,11 +66,11 @@ Zendesk's refresh tokens are single-use and rotate on every refresh. If a step f
 
 ### Update Ticket
 
-**Inputs:** `ticket_id`\*, everything else optional (`ticket_status`, `priority`, `type`, `assignee_id`, `group_id`, `ticket_tags` + `remove_tags`, `custom_fields`). Raises `no_fields_to_update` if nothing besides `ticket_id` is set.
+**Inputs:** `ticket_id`\*, everything else optional (`ticket_status`, `priority`, `type`, `assignee_id`, `group_id`, `add_tags`, `remove_tags`, `custom_fields`). Raises `no_fields_to_update` if nothing besides `ticket_id` is set.
 
 **Outputs:** `ticket_id`, `ticket_status`, `updated_at`.
 
-`remove_tags` (boolean, default `false`) controls whether `ticket_tags` are added (`false`) or removed (`true`). Tags are added/removed via Zendesk's dedicated tags endpoints (`PUT`/`DELETE /api/v2/tickets/{id}/tags.json`), not the main ticket-update body — Zendesk doesn't accept partial tag changes there. Existing tags not listed are always left untouched. Zendesk does not allow adding or removing tags on a closed ticket.
+`add_tags` and `remove_tags` are independent comma-separated lists — set either or both in the same call to add some tags and remove others at once. Both are applied via Zendesk's dedicated tags endpoints (`PUT`/`DELETE /api/v2/tickets/{id}/tags.json`), not the main ticket-update body — Zendesk doesn't accept tag changes there. Tags not listed in either field are always left untouched. Zendesk does not allow adding or removing tags on a closed ticket.
 
 ### Add Ticket Comment
 

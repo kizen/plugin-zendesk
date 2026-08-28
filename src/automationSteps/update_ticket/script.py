@@ -78,8 +78,8 @@ priority = getattr(inputs, "priority", None)
 ticket_type = getattr(inputs, "type", None)
 assignee_id = getattr(inputs, "assignee_id", None)
 group_id = getattr(inputs, "group_id", None)
-tags = getattr(inputs, "ticket_tags", None)
-remove_tags_flag = bool(getattr(inputs, "remove_tags", False))
+add_tags_raw = getattr(inputs, "add_tags", None)
+remove_tags_raw = getattr(inputs, "remove_tags", None)
 custom_fields = getattr(inputs, "custom_fields", None)
 
 if priority and priority not in VALID_PRIORITIES:
@@ -125,9 +125,10 @@ if custom_fields:
         raise Exception("Zendesk error: invalid_custom_fields — must be a JSON array of {id, value} objects.")
     ticket["custom_fields"] = parsed_custom_fields
 
-tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+add_tag_list = [t.strip() for t in add_tags_raw.split(",") if t.strip()] if add_tags_raw else []
+remove_tag_list = [t.strip() for t in remove_tags_raw.split(",") if t.strip()] if remove_tags_raw else []
 
-if not ticket and not tag_list:
+if not ticket and not add_tag_list and not remove_tag_list:
     raise Exception("Zendesk error: no_fields_to_update — set at least one field besides Ticket ID.")
 
 # zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
@@ -151,16 +152,25 @@ if ticket:
         raise_zendesk_error(resp, "updating ticket")
     result = resp.json().get("body", {}).get("ticket", {})
 
-if tag_list:
-    tags_method = kizen.api.delete if remove_tags_flag else kizen.api.put
-    tags_resp = zendesk_request_with_retry(
-        tags_method,
+if add_tag_list:
+    add_resp = zendesk_request_with_retry(
+        kizen.api.put,
         f"{BASE_URL}/api/v2/tickets/{ticket_id}/tags.json",
-        json={"tags": tag_list},
+        json={"tags": add_tag_list},
         params={"full_domain": full_domain},
     )
-    if is_upstream_error(tags_resp):
-        raise_zendesk_error(tags_resp, "removing tags" if remove_tags_flag else "adding tags")
+    if is_upstream_error(add_resp):
+        raise_zendesk_error(add_resp, "adding tags")
+
+if remove_tag_list:
+    remove_resp = zendesk_request_with_retry(
+        kizen.api.delete,
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}/tags.json",
+        json={"tags": remove_tag_list},
+        params={"full_domain": full_domain},
+    )
+    if is_upstream_error(remove_resp):
+        raise_zendesk_error(remove_resp, "removing tags")
 
 if not result:
     # Only tags changed — the tags endpoint doesn't return ticket_status/updated_at, so fetch them.

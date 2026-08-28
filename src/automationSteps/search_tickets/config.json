@@ -46,7 +46,7 @@
     {
       "name": "ticket_tags",
       "label": "Tags",
-      "hint": "Comma-separated list of tags — matches tickets having ALL of these tags.",
+      "hint": "Comma-separated list of tags — matches tickets having ANY of these tags (Zendesk treats repeated tags: clauses as OR).",
       "data_type": "string",
       "required": false,
       "input_source": "variable",

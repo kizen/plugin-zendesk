@@ -5,7 +5,7 @@
   "description": "Manage Zendesk support tickets from Kizen agentic workflows.",
   "published": false,
   "release_branches": ["main"],
-  "release_environments": ["staging"],
+  "release_environments": ["dev"],
   "engine": "1.0.0",
   "entry": "src/",
   "release_notes_directory": "releaseNotes/",
@@ -14,7 +14,8 @@
     "secrets": ["zendesk_subdomain"]
   },
   "developer_business_id": {
-    "staging": "0fbf2bd5-f7c4-4bb1-a354-6d3d79120a41"
+    "staging": "0fbf2bd5-f7c4-4bb1-a354-6d3d79120a41",
+    "integration": "6895f9c9-968b-4eba-9541-4782ecd9bf01"
   },
   "services": [
     {

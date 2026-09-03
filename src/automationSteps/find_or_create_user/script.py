@@ -55,6 +55,14 @@ def check_response(resp, context):
             raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
 
 
+def single_match(users, key_label, key_value):
+    if len(users) > 1:
+        raise Exception(
+            f"Zendesk error: ambiguous_match — {len(users)} users found with {key_label} {key_value!r}; expected at most one."
+        )
+    return users[0] if users else None
+
+
 def upstream_status_code(resp):
     try:
         payload = resp.json()
@@ -122,7 +130,7 @@ if not user and external_id:
     )
     check_response(resp, "searching for user by external ID")
     users = resp.json().get("body", {}).get("users") or []
-    user = users[0] if users else None
+    user = single_match(users, "External ID", external_id)
 
 if not user and email:
     resp = zendesk_request_with_retry(
@@ -132,7 +140,7 @@ if not user and email:
     )
     check_response(resp, "searching for user by email")
     users = resp.json().get("body", {}).get("users") or []
-    user = users[0] if users else None
+    user = single_match(users, "Email", email)
 
 if not user and name:
     resp = zendesk_request_with_retry(
@@ -142,7 +150,7 @@ if not user and name:
     )
     check_response(resp, "searching for user by name")
     users = resp.json().get("body", {}).get("users") or []
-    user = users[0] if users else None
+    user = single_match(users, "Name", name)
 
 was_created = False
 

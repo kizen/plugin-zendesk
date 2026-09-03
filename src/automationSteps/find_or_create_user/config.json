@@ -37,7 +37,7 @@
     {
       "name": "user_name",
       "label": "Name",
-      "hint": "Lowest-priority search key — tried only if Zendesk User ID, External ID, and Email are all either unset or found no match. Required if Create If Missing is true and no user matches yet.",
+      "hint": "Lowest-priority search key — tried only if Zendesk User ID, External ID, and Email are all either unset or found no match. Required if Create If Missing is true and no user matches yet. Name matching is fuzzy — if more than one user matches, the action raises an error rather than guessing.",
       "data_type": "string",
       "required": false,
       "input_source": "variable"

@@ -61,16 +61,16 @@
     {
       "name": "created_after",
       "label": "Created After",
-      "hint": "Date (YYYY-MM-DD), or a full ISO 8601 datetime (e.g. 2026-08-28T14:30:00-05:00) for time-of-day precision — timezone offsets are honored.",
-      "data_type": "string",
+      "hint": "Date or datetime, with time-of-day and timezone honored if given.",
+      "data_type": "datetime",
       "required": false,
       "input_source": "variable"
     },
     {
       "name": "updated_after",
       "label": "Updated After",
-      "hint": "Date (YYYY-MM-DD), or a full ISO 8601 datetime (e.g. 2026-08-28T14:30:00-05:00) for time-of-day precision — timezone offsets are honored.",
-      "data_type": "string",
+      "hint": "Date or datetime, with time-of-day and timezone honored if given.",
+      "data_type": "datetime",
       "required": false,
       "input_source": "variable"
     },

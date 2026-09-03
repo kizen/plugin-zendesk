@@ -100,11 +100,11 @@ Paginates for real, up to a 1000-comment safety cap, fetching newest-first so `l
 
 ### Search Tickets
 
-**Inputs:** all optional — `requester_email`, `ticket_status`, `priority`, `type` (Ticket Type), `ticket_tags`, `organization_id`, `created_after`, `updated_after`, `external_id`, `raw_query`, `limit` (string, default `100`).
+**Inputs:** all optional — `requester_email` (email), `ticket_status`, `priority`, `type` (Ticket Type), `ticket_tags`, `organization_id`, `created_after`/`updated_after` (datetime), `external_id`, `raw_query`, `limit` (string, default `100`).
 
 **Outputs:** `tickets` (JSON array string, each with `id`/`subject`/`status`/`priority`/`requester_id`/`updated_at`/`ticket_url`), `count`.
 
-Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` accept a bare date (`YYYY-MM-DD`) or a full ISO 8601 datetime with timezone offset — Zendesk honors the offset, so pass a full timestamp when time-of-day precision matters rather than relying on date-only comparison. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages); if the resulting JSON would exceed Kizen's 50,000-character output limit, the oldest tickets are dropped first (and `count` reflects what's actually included) until it fits.
+Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` accept a date or datetime; Zendesk honors the time-of-day and timezone if given, rather than only comparing dates. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages); if the resulting JSON would exceed Kizen's 50,000-character output limit, the oldest tickets are dropped first (and `count` reflects what's actually included) until it fits.
 
 ### Find or Create User
 

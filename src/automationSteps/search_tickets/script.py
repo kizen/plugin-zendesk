@@ -1,6 +1,5 @@
 import json
 import time
-from datetime import datetime
 from urllib.parse import urlparse
 
 # Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
@@ -79,15 +78,10 @@ def zendesk_request_with_retry(method, url, **kwargs):
     return resp
 
 
-def as_search_date(value, label):
-    # Zendesk's search accepts full ISO 8601 timestamps — pass the value through as-is so timezone offsets are honored, rather than truncating to a date and losing them.
-    if not value:
-        return None
-    try:
-        datetime.strptime(value[:10], "%Y-%m-%d")
-    except ValueError:
-        raise Exception(f"Zendesk error: invalid_{label} — expected YYYY-MM-DD or an ISO 8601 datetime, got {value!r}.")
-    return value
+def as_search_date(value):
+    # data_type: "datetime" delivers a real datetime object, already validated by the platform — Zendesk's
+    # search accepts the full ISO 8601 string, timezone offset included, so no truncation is needed.
+    return value.isoformat() if value else None
 
 
 # MAIN LOGIC
@@ -143,10 +137,10 @@ else:
         clauses.extend(f"tags:{t.strip()}" for t in tags.split(",") if t.strip())
     if organization_id:
         clauses.append(f"organization:{organization_id}")
-    created_date = as_search_date(created_after, "created_after")
+    created_date = as_search_date(created_after)
     if created_date:
         clauses.append(f"created>{created_date}")
-    updated_date = as_search_date(updated_after, "updated_after")
+    updated_date = as_search_date(updated_after)
     if updated_date:
         clauses.append(f"updated>{updated_date}")
     if external_id:

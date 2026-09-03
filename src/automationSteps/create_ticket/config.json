@@ -21,8 +21,16 @@
     {
       "name": "comment_body",
       "label": "Description",
-      "hint": "Becomes the ticket's description and initial public comment.",
+      "hint": "Becomes the ticket's description and initial comment.",
       "data_type": "string",
+      "required": true,
+      "input_source": "variable"
+    },
+    {
+      "name": "is_public",
+      "label": "Is Public Comment",
+      "hint": "True posts the initial comment as a public reply, visible to the requester; false posts it as an internal note, visible only to agents.",
+      "data_type": "boolean",
       "required": true,
       "input_source": "variable"
     },

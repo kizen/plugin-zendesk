@@ -54,7 +54,7 @@ Zendesk's refresh tokens are single-use and rotate on every refresh. If a step f
 
 ### Create Ticket
 
-**Inputs:** `subject` (Ticket Title)\*, `comment_body` (Description)\*, `requester_email`, `requester_name`, `priority`, `type` (Ticket Type), `ticket_status`, `ticket_tags` (comma-separated), `assignee_id`, `group_id`, `external_id`, `custom_fields` (JSON array string).
+**Inputs:** `subject` (Ticket Title)\*, `comment_body` (Description)\*, `is_public`\* (boolean), `requester_email`, `requester_name`, `priority`, `type` (Ticket Type), `ticket_status`, `ticket_tags` (comma-separated), `assignee_id`, `group_id`, `external_id`, `custom_fields` (JSON array string).
 
 **Outputs:** `ticket_id`, `ticket_url`, `ticket_status`, `created_at`.
 

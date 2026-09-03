@@ -76,6 +76,7 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 subject = inputs.subject
 comment_body = inputs.comment_body
+is_public = bool(inputs.is_public)
 requester_email = getattr(inputs, "requester_email", None)
 requester_name = getattr(inputs, "requester_name", None)
 priority = (getattr(inputs, "priority", None) or "").strip().lower() or None
@@ -105,7 +106,7 @@ if status == "pending" and not assignee_id:
 
 ticket = {
     "subject": subject,
-    "comment": {"body": comment_body, "public": True},
+    "comment": {"body": comment_body, "public": is_public},
 }
 
 if requester_email:

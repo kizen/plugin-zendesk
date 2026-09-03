@@ -92,9 +92,9 @@ def as_search_date(value, label):
 # MAIN LOGIC
 
 requester_email = getattr(inputs, "requester_email", None)
-status = getattr(inputs, "ticket_status", None)
-priority = getattr(inputs, "priority", None)
-ticket_type = getattr(inputs, "type", None)
+status = (getattr(inputs, "ticket_status", None) or "").strip().lower() or None
+priority = (getattr(inputs, "priority", None) or "").strip().lower() or None
+ticket_type = (getattr(inputs, "type", None) or "").strip().lower() or None
 tags = getattr(inputs, "ticket_tags", None)
 organization_id = getattr(inputs, "organization_id", None)
 created_after = getattr(inputs, "created_after", None)

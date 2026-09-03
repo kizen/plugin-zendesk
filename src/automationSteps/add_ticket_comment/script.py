@@ -72,7 +72,7 @@ def zendesk_request_with_retry(method, url, **kwargs):
 ticket_id = inputs.ticket_id
 comment_body = inputs.body
 is_public = bool(inputs.is_public)
-status = getattr(inputs, "ticket_status", None)
+status = (getattr(inputs, "ticket_status", None) or "").strip().lower() or None
 
 if status and status not in VALID_STATUSES:
     raise Exception(

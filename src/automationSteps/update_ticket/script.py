@@ -73,9 +73,9 @@ def zendesk_request_with_retry(method, url, **kwargs):
 # MAIN LOGIC
 
 ticket_id = inputs.ticket_id
-status = getattr(inputs, "ticket_status", None)
-priority = getattr(inputs, "priority", None)
-ticket_type = getattr(inputs, "type", None)
+status = (getattr(inputs, "ticket_status", None) or "").strip().lower() or None
+priority = (getattr(inputs, "priority", None) or "").strip().lower() or None
+ticket_type = (getattr(inputs, "type", None) or "").strip().lower() or None
 assignee_id = getattr(inputs, "assignee_id", None)
 group_id = getattr(inputs, "group_id", None)
 add_tags_raw = getattr(inputs, "add_tags", None)

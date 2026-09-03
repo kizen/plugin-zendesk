@@ -6,15 +6,16 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_add_ticket_comment",
   "script": "script.py",
-  "secrets": ["zendesk_subdomain"],
+  "secrets": [
+    "zendesk_subdomain"
+  ],
   "inputs": [
     {
       "name": "ticket_id",
       "label": "Ticket ID",
       "data_type": "string",
       "required": true,
-      "input_source": "variable",
-      "script_alias": "ticket_id"
+      "input_source": "variable"
     },
     {
       "name": "body",
@@ -22,8 +23,7 @@
       "hint": "The comment text to add.",
       "data_type": "string",
       "required": true,
-      "input_source": "variable",
-      "script_alias": "body"
+      "input_source": "variable"
     },
     {
       "name": "is_public",
@@ -31,8 +31,7 @@
       "hint": "True posts a public reply, visible to the requester; false posts an internal note, visible only to agents.",
       "data_type": "boolean",
       "required": true,
-      "input_source": "variable",
-      "script_alias": "is_public"
+      "input_source": "variable"
     },
     {
       "name": "ticket_status",
@@ -40,8 +39,7 @@
       "hint": "One of: new, open, pending, hold, solved, closed. Leave blank to leave status unchanged.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "ticket_status"
+      "input_source": "variable"
     }
   ],
   "outputs": [
@@ -49,7 +47,6 @@
       "name": "comment_id",
       "label": "Comment ID",
       "data_type": "string",
-      "script_alias": "comment_id",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -57,8 +54,7 @@
       "name": "created_at",
       "label": "Created At",
       "hint": "ISO 8601 timestamp as returned by Zendesk.",
-      "data_type": "string",
-      "script_alias": "created_at",
+      "data_type": "datetime",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -66,7 +62,6 @@
       "name": "is_public",
       "label": "Is Public Comment",
       "data_type": "boolean",
-      "script_alias": "is_public",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     }

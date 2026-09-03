@@ -6,7 +6,9 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_find_or_create_user",
   "script": "script.py",
-  "secrets": ["zendesk_subdomain"],
+  "secrets": [
+    "zendesk_subdomain"
+  ],
   "inputs": [
     {
       "name": "zendesk_user_id",
@@ -14,8 +16,7 @@
       "hint": "Zendesk's own internal numeric user ID (not External ID — see that field for the distinction). Highest-priority search key — a direct, unambiguous record fetch, checked before External ID, Email, or Name.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "zendesk_user_id"
+      "input_source": "variable"
     },
     {
       "name": "external_id",
@@ -23,8 +24,7 @@
       "hint": "e.g. a Kizen contact ID, stored on the Zendesk user record for cross-referencing. Used to find an existing user (via Zendesk's guaranteed-unique external ID lookup) if Zendesk User ID isn't set, before Email or Name are considered. Also stored on the record when creating a new user.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "external_id"
+      "input_source": "variable"
     },
     {
       "name": "user_email",
@@ -32,8 +32,7 @@
       "hint": "Used to find an existing user if neither Zendesk User ID nor External ID is set, or create one if Create If Missing is enabled.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "user_email"
+      "input_source": "variable"
     },
     {
       "name": "user_name",
@@ -41,8 +40,7 @@
       "hint": "Lowest-priority search key — only used to find a user if none of Zendesk User ID, External ID, or Email is set. Required if Create If Missing is true and no user matches yet.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "user_name"
+      "input_source": "variable"
     },
     {
       "name": "phone",
@@ -50,8 +48,7 @@
       "hint": "Only used when creating a new user.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "phone"
+      "input_source": "variable"
     },
     {
       "name": "organization_id",
@@ -59,8 +56,7 @@
       "hint": "Numeric Zendesk organization ID — visible in the organization's URL under Admin Center → People → Organizations. Only used when creating a new user.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "organization_id"
+      "input_source": "variable"
     },
     {
       "name": "create_if_missing",
@@ -68,8 +64,7 @@
       "hint": "If true and no user matches, creates one. Defaults to false — no user is created otherwise.",
       "data_type": "boolean",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "create_if_missing"
+      "input_source": "variable"
     }
   ],
   "outputs": [
@@ -77,7 +72,6 @@
       "name": "user_id",
       "label": "User ID",
       "data_type": "string",
-      "script_alias": "user_id",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -85,7 +79,6 @@
       "name": "user_name",
       "label": "Name",
       "data_type": "string",
-      "script_alias": "user_name",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -93,7 +86,6 @@
       "name": "user_email",
       "label": "Email",
       "data_type": "string",
-      "script_alias": "user_email",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -101,7 +93,6 @@
       "name": "organization_id",
       "label": "Organization ID",
       "data_type": "string",
-      "script_alias": "organization_id",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -110,7 +101,6 @@
       "label": "Role",
       "hint": "One of: end-user, agent, admin.",
       "data_type": "string",
-      "script_alias": "role",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -119,7 +109,6 @@
       "label": "Was Created",
       "hint": "True if a new user was created; false if an existing user was found.",
       "data_type": "boolean",
-      "script_alias": "was_created",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     }

@@ -6,7 +6,9 @@
   "runtime": "python-3-13",
   "action_type": "zendesk_search_tickets",
   "script": "script.py",
-  "secrets": ["zendesk_subdomain"],
+  "secrets": [
+    "zendesk_subdomain"
+  ],
   "inputs": [
     {
       "name": "requester_email",
@@ -14,8 +16,7 @@
       "hint": "Matches tickets requested by this email address.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "requester_email"
+      "input_source": "variable"
     },
     {
       "name": "ticket_status",
@@ -23,8 +24,7 @@
       "hint": "One of: new, open, pending, hold, solved, closed.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "ticket_status"
+      "input_source": "variable"
     },
     {
       "name": "priority",
@@ -32,8 +32,7 @@
       "hint": "One of: urgent, high, normal, low.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "priority"
+      "input_source": "variable"
     },
     {
       "name": "type",
@@ -41,8 +40,7 @@
       "hint": "One of: problem, incident, question, task.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "type"
+      "input_source": "variable"
     },
     {
       "name": "ticket_tags",
@@ -50,8 +48,7 @@
       "hint": "Comma-separated list of tags — matches tickets having ANY of these tags (Zendesk treats repeated tags: clauses as OR).",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "ticket_tags"
+      "input_source": "variable"
     },
     {
       "name": "organization_id",
@@ -59,8 +56,7 @@
       "hint": "Numeric Zendesk organization ID — visible in the organization's URL under Admin Center → People → Organizations.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "organization_id"
+      "input_source": "variable"
     },
     {
       "name": "created_after",
@@ -68,8 +64,7 @@
       "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "created_after"
+      "input_source": "variable"
     },
     {
       "name": "updated_after",
@@ -77,8 +72,7 @@
       "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "updated_after"
+      "input_source": "variable"
     },
     {
       "name": "external_id",
@@ -86,8 +80,7 @@
       "hint": "Matches tickets with this External ID (set via Create Ticket or Update Ticket).",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "external_id"
+      "input_source": "variable"
     },
     {
       "name": "raw_query",
@@ -95,8 +88,7 @@
       "hint": "Raw Zendesk search query fragment (see Zendesk's search syntax docs). If set, this REPLACES every filter above — combined only with a fixed type:ticket.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "raw_query"
+      "input_source": "variable"
     },
     {
       "name": "limit",
@@ -104,8 +96,7 @@
       "hint": "Maximum number of matching tickets to return; paginates automatically to satisfy this. Zendesk caps search at 1,000 total results (100/page, 10 pages) — requests above that are clamped. Defaults to 100 if left unset.",
       "data_type": "string",
       "required": false,
-      "input_source": "variable",
-      "script_alias": "limit"
+      "input_source": "variable"
     }
   ],
   "outputs": [
@@ -114,7 +105,6 @@
       "label": "Tickets",
       "hint": "JSON array string of matching tickets, each with id/subject/status/priority/requester_id/updated_at/ticket_url.",
       "data_type": "string",
-      "script_alias": "tickets",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },
@@ -123,7 +113,6 @@
       "label": "Count",
       "hint": "Number of tickets included in Tickets.",
       "data_type": "number",
-      "script_alias": "count",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     }

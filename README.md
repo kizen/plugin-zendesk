@@ -72,6 +72,8 @@ Zendesk's refresh tokens are single-use and rotate on every refresh. If a step f
 
 `add_tags` and `remove_tags` are independent comma-separated lists — set either or both in the same call to add some tags and remove others at once. Both are applied via Zendesk's dedicated tags endpoints (`PUT`/`DELETE /api/v2/tickets/{id}/tags.json`), not the main ticket-update body — Zendesk doesn't accept tag changes there. Tags not listed in either field are always left untouched. Zendesk does not allow adding or removing tags on a closed ticket.
 
+When updating ticket fields (not just tags), this action fetches the ticket's current state first and submits the update with Zendesk's `safe_update` protection — if someone else changed the ticket in the meantime, Zendesk rejects the write with a conflict error instead of silently overwriting their change.
+
 ### Add Ticket Comment
 
 **Inputs:** `ticket_id`\*, `body`\*, `is_public`\* (boolean), `ticket_status` (optional).

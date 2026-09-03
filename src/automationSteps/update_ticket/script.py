@@ -145,6 +145,19 @@ full_domain = f"{zendesk_subdomain}.zendesk.com"
 result = {}
 
 if ticket:
+    # Fetch the ticket's current updated_at first so the update below can use Zendesk's safe_update
+    # mechanism — this rejects the write with a 409 if someone else changed the ticket in the meantime,
+    # instead of silently overwriting their change.
+    current_resp = zendesk_request_with_retry(
+        kizen.api.get,
+        f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
+        params={"full_domain": full_domain},
+    )
+    check_response(current_resp, "fetching current ticket state")
+    current_ticket = current_resp.json().get("body", {}).get("ticket", {})
+    ticket["safe_update"] = True
+    ticket["updated_stamp"] = current_ticket.get("updated_at")
+
     resp = zendesk_request_with_retry(
         kizen.api.put,
         f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",

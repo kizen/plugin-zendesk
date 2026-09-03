@@ -102,7 +102,7 @@ Paginates for real, up to a 1000-comment safety cap, fetching newest-first so `l
 
 **Outputs:** `tickets` (JSON array string, each with `id`/`subject`/`status`/`priority`/`requester_id`/`updated_at`/`ticket_url`), `count`.
 
-Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` only use the date portion — Zendesk's search date filters don't support time-of-day granularity. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages).
+Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` accept a bare date (`YYYY-MM-DD`) or a full ISO 8601 datetime with timezone offset — Zendesk honors the offset, so pass a full timestamp when time-of-day precision matters rather than relying on date-only comparison. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages).
 
 ### Find or Create User
 

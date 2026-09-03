@@ -79,15 +79,14 @@ def zendesk_request_with_retry(method, url, **kwargs):
 
 
 def as_search_date(value, label):
-    # Zendesk's search date filters are date-only (YYYY-MM-DD) — accept a bare date or ISO datetime.
+    # Zendesk's search accepts full ISO 8601 timestamps — pass the value through as-is so timezone offsets are honored, rather than truncating to a date and losing them.
     if not value:
         return None
-    date_part = value[:10]
     try:
-        datetime.strptime(date_part, "%Y-%m-%d")
+        datetime.strptime(value[:10], "%Y-%m-%d")
     except ValueError:
-        raise Exception(f"Zendesk error: invalid_{label} — expected YYYY-MM-DD (or an ISO datetime), got {value!r}.")
-    return date_part
+        raise Exception(f"Zendesk error: invalid_{label} — expected YYYY-MM-DD or an ISO 8601 datetime, got {value!r}.")
+    return value
 
 
 # MAIN LOGIC

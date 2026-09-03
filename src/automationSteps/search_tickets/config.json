@@ -61,7 +61,7 @@
     {
       "name": "created_after",
       "label": "Created After",
-      "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
+      "hint": "Date (YYYY-MM-DD), or a full ISO 8601 datetime (e.g. 2026-08-28T14:30:00-05:00) for time-of-day precision — timezone offsets are honored.",
       "data_type": "string",
       "required": false,
       "input_source": "variable"
@@ -69,7 +69,7 @@
     {
       "name": "updated_after",
       "label": "Updated After",
-      "hint": "Date (YYYY-MM-DD), or an ISO datetime (only the date portion is used — Zendesk search doesn't filter by time of day).",
+      "hint": "Date (YYYY-MM-DD), or a full ISO 8601 datetime (e.g. 2026-08-28T14:30:00-05:00) for time-of-day precision — timezone offsets are honored.",
       "data_type": "string",
       "required": false,
       "input_source": "variable"

@@ -143,7 +143,9 @@ if custom_fields:
         parsed_custom_fields = json.loads(custom_fields)
     except json.JSONDecodeError as exc:
         raise Exception(f"Zendesk error: invalid_custom_fields — must be valid JSON: {exc}")
-    if not isinstance(parsed_custom_fields, list):
+    if not isinstance(parsed_custom_fields, list) or not all(
+        isinstance(item, dict) and "id" in item and "value" in item for item in parsed_custom_fields
+    ):
         raise Exception("Zendesk error: invalid_custom_fields — must be a JSON array of {id, value} objects.")
     ticket["custom_fields"] = parsed_custom_fields
 

@@ -122,43 +122,4 @@ At least one of `zendesk_user_id`, `external_id`, `user_email`, or `user_name` m
 
 ## Architecture Notes
 
-**Proxy envelope.** `kizen.api.{get,post,put,patch,delete}` wraps a successful upstream call as `{"status_code", "response_headers", "body"}`. The proxy's own HTTP status doesn't reliably reflect whether the upstream Zendesk call succeeded — a connection failure can come back as the proxy's own `200 OK` with a failure embedded in the body. Every script uses a shared `is_upstream_error(resp)` helper checking both `resp.ok` and the embedded `status_code`.
-
 **Per-business host routing.** Every action reads a `zendesk_subdomain` Integration Secret and builds a `full_domain` query parameter on every real Zendesk call, so each business's actions route to that business's own account. The same secret name also templates `authorize_url`/`token_url` in `kizen.json` via `{{secret.zendesk_subdomain}}`, so the OAuth connect flow itself authenticates against the business's own account — but this is a genuinely separate value registration from the Integration Secret, despite the identical name; setting one does not set the other.
-
-**Reserved field names.** `status`, `tags`, `email`, and `name` are rejected as automation-step input/output names at publish time — not caught by client-side validation. This plugin works around it by prefixing (`ticket_status`, `ticket_tags`, `user_email`, `user_name`).
-
-**Optional numeric and boolean inputs need care.** A `data_type: "number"` input crashes the platform's input-construction step if left blank, regardless of `required`/`default` — every numeric-ish input here uses `data_type: "string"` instead. A blank optional boolean input arrives at the script as the literal value `false`, not unset/`null` — inputs are named so `false` is also the intended default, rather than relying on a `getattr(..., default)` pattern to recover an "unset" state that doesn't actually exist.
-
-## Contributing
-
-### Add a new action
-
-1. Create a new folder under `src/automationSteps/`.
-2. Add `config.json` with `name`, `plugin_description`, `action_description`, `action_type`, `runtime: "python-3-13"`, `script`, `"secrets": ["zendesk_subdomain"]`, `inputs[]`, `outputs[]`. Avoid the field names `status`/`tags`/`email`/`name`; use `data_type: "string"` for numeric-ish optional fields.
-3. Add `script.py`. Copy the `is_upstream_error`, `raise_zendesk_error`, and `zendesk_request_with_retry` helpers from any existing action, along with the `zendesk_subdomain` secret-read and `full_domain` construction block — pass `full_domain` (plus an explicit `/api/v2` path segment) on every `kizen.api` call.
-4. Validate locally with `npx @kizenapps/cli build`, then test in the dev toolkit's Code Steps sandbox.
-5. Push and test the real round-trip in Remote mode before merging.
-
-### Add a new OAuth scope
-
-Add it to `auth_credentials.scopes` in `kizen.json`, deploy, then reconnect — an already-connected token doesn't retroactively gain a new scope.
-
-## File Structure
-
-```text
-plugin-zendesk/
-├── kizen.json                    # Manifest, OAuth config, scopes
-├── README.md                     # This file
-├── src/
-│   ├── thumbnail.png             # Generic placeholder icon
-│   └── automationSteps/
-│       ├── create_ticket/
-│       ├── update_ticket/
-│       ├── add_ticket_comment/
-│       ├── get_ticket/
-│       ├── get_ticket_comments/
-│       ├── search_tickets/
-│       └── find_or_create_user/
-│           └── {config.json, script.py}
-```

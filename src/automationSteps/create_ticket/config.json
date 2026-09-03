@@ -1,4 +1,5 @@
 {
+  "api_name": "create_ticket",
   "name": "Create Ticket",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Opens a new ticket in the connected Zendesk account with a subject and an initial comment, optionally setting requester, priority, type, status, tags, assignee, group, external ID, and custom fields.",

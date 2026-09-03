@@ -1,4 +1,5 @@
 {
+  "api_name": "add_ticket_comment",
   "name": "Add Ticket Comment",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Posts a public reply or an internal note on an existing ticket, optionally changing its status at the same time.",

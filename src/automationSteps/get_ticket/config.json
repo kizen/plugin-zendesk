@@ -1,4 +1,5 @@
 {
+  "api_name": "get_ticket",
   "name": "Get Ticket",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Fetches a ticket's current state, including its requester's email address.",

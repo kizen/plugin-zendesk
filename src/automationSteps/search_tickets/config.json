@@ -1,4 +1,5 @@
 {
+  "api_name": "search_tickets",
   "name": "Search Tickets",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Finds tickets by requester, status, priority, type, tags, organization, external ID, or date. Combine filters, or supply a raw Zendesk search query for full control.",

@@ -1,4 +1,5 @@
 {
+  "api_name": "update_ticket",
   "name": "Update Ticket",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Changes fields on an existing ticket: status, priority, type, assignee, group, tags, or custom fields. Only the fields you set are changed.",

@@ -1,4 +1,5 @@
 {
+  "api_name": "find_or_create_user",
   "name": "Find or Create User",
   "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Looks up a Zendesk end user by Zendesk User ID, External ID, email, or name (in that priority order), optionally creating them if no match exists.",

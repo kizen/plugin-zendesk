@@ -86,15 +86,13 @@ ticket_id = inputs.ticket_id
 public_only = bool(getattr(inputs, "public_only", False))
 limit = getattr(inputs, "limit", None)
 
-if limit is None or limit == "":
+if not limit:
     target_count = DEFAULT_LIMIT
 else:
     try:
         target_count = int(limit)
     except (TypeError, ValueError):
         raise Exception(f"Zendesk error: invalid_limit — must be a number, got {limit!r}.")
-    if target_count < 1:
-        raise Exception("Zendesk error: invalid_limit — must be at least 1.")
 
 # zendesk_subdomain Integration Secret — same name as the OAuth-templating secret, separate value registration.
 subdomain_secret_key = next((key for key in secrets if key.endswith("zendesk_subdomain")), None)

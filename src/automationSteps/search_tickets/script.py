@@ -117,15 +117,13 @@ if ticket_type and ticket_type not in VALID_TYPES:
         f"Zendesk error: invalid_type — must be one of {', '.join(sorted(VALID_TYPES))}, got {ticket_type!r}."
     )
 
-if limit is None or limit == "":
+if not limit:
     target_count = DEFAULT_LIMIT
 else:
     try:
         target_count = int(limit)
     except (TypeError, ValueError):
         raise Exception(f"Zendesk error: invalid_limit — must be a number, got {limit!r}.")
-    if target_count < 1:
-        raise Exception("Zendesk error: invalid_limit — must be at least 1.")
 target_count = min(target_count, MAX_RESULTS)
 
 if raw_query:

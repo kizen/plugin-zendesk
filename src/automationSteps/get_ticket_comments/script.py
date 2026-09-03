@@ -8,6 +8,7 @@ BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 MAX_PER_PAGE = 100
 DEFAULT_LIMIT = 100
 MAX_PAGES = 10  # Safety cap on execution time, not a Zendesk limit — 10 * 100/page = 1000 comments.
+MAX_OUTPUT_CHARS = 50000  # Kizen's known limit on a single output value.
 
 # HELPERS
 
@@ -149,10 +150,14 @@ for comment in reversed(comments):  # oldest to newest for the transcript
         f"[{format_timestamp(comment.get('created_at'))}] {author_label(comment)} ({visibility}): {comment.get('body', '')}"
     )
 
+# Drop oldest lines first if the joined transcript would exceed Kizen's output character limit.
+while lines and len("\n".join(lines)) > MAX_OUTPUT_CHARS:
+    lines.pop(0)
+
 last_comment = comments[0] if comments else None  # comments is still newest-first here
 
 outputs.thread_text = "\n".join(lines)
-outputs.comment_count = len(comments)
+outputs.comment_count = len(lines)
 outputs.last_comment_body = last_comment.get("body", "") if last_comment else ""
 outputs.last_comment_is_public = bool(last_comment.get("public")) if last_comment else False
 outputs.last_comment_author_id = str(last_comment.get("author_id", "")) if last_comment else ""

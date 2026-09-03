@@ -103,7 +103,7 @@
     {
       "name": "tickets",
       "label": "Tickets",
-      "hint": "JSON array string of matching tickets, each with id/subject/status/priority/requester_id/updated_at/ticket_url.",
+      "hint": "JSON array string of matching tickets, each with id/subject/status/priority/requester_id/updated_at/ticket_url. If the full list would exceed 50,000 characters, the oldest tickets are dropped first to fit.",
       "data_type": "string",
       "conflict_resolution": "overwrite",
       "create_field_options": false

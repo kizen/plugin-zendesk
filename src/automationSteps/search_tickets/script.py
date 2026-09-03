@@ -15,6 +15,7 @@ MAX_PER_PAGE = 100
 DEFAULT_LIMIT = 100
 MAX_RESULTS = 1000  # Zendesk's own hard cap on /search (100/page * 10 pages) — 422s beyond this.
 MAX_PAGES = MAX_RESULTS // MAX_PER_PAGE
+MAX_OUTPUT_CHARS = 50000  # Kizen's known limit on a single output value.
 
 # HELPERS
 
@@ -208,5 +209,12 @@ def ticket_summary(ticket):
     }
 
 
-outputs.tickets = json.dumps([ticket_summary(t) for t in tickets])
-outputs.count = len(tickets)
+# Tickets are newest-first — drop the oldest ones first if the JSON would exceed Kizen's output character limit.
+summaries = [ticket_summary(t) for t in tickets]
+tickets_json = json.dumps(summaries)
+while summaries and len(tickets_json) > MAX_OUTPUT_CHARS:
+    summaries.pop()
+    tickets_json = json.dumps(summaries)
+
+outputs.tickets = tickets_json
+outputs.count = len(summaries)

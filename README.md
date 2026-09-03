@@ -94,7 +94,7 @@ The ticket object only carries `requester_id`, not email — a second call, `GET
 
 **Outputs:** `thread_text` (formatted transcript, oldest to newest), `comment_count`, `last_comment_body`, `last_comment_is_public`, `last_comment_author_id`.
 
-Paginates for real, up to a 1000-comment safety cap, fetching newest-first so `limit` means "N most recent," then reversing that slice into chronological order. Uses Zendesk's `include=users` side-loading to resolve commenter names in one pass.
+Paginates for real, up to a 1000-comment safety cap, fetching newest-first so `limit` means "N most recent," then reversing that slice into chronological order. Uses Zendesk's `include=users` side-loading to resolve commenter names in one pass. If the resulting transcript would exceed Kizen's 50,000-character output limit, the oldest comments are dropped first (and `comment_count` reflects what's actually included) until it fits.
 
 ### Search Tickets
 
@@ -102,7 +102,7 @@ Paginates for real, up to a 1000-comment safety cap, fetching newest-first so `l
 
 **Outputs:** `tickets` (JSON array string, each with `id`/`subject`/`status`/`priority`/`requester_id`/`updated_at`/`ticket_url`), `count`.
 
-Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` accept a bare date (`YYYY-MM-DD`) or a full ISO 8601 datetime with timezone offset — Zendesk honors the offset, so pass a full timestamp when time-of-day precision matters rather than relying on date-only comparison. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages).
+Always prefixed `type:ticket`. `ticket_tags` matches tickets having **any** of the listed tags — Zendesk treats repeated `tags:` clauses as OR, not AND, unlike combining different filter types (which does AND together). `raw_query`, when set, replaces every structured filter above rather than merging both. `created_after`/`updated_after` accept a bare date (`YYYY-MM-DD`) or a full ISO 8601 datetime with timezone offset — Zendesk honors the offset, so pass a full timestamp when time-of-day precision matters rather than relying on date-only comparison. Paginates up to Zendesk's hard 1,000-result cap (100/page × 10 pages); if the resulting JSON would exceed Kizen's 50,000-character output limit, the oldest tickets are dropped first (and `count` reflects what's actually included) until it fits.
 
 ### Find or Create User
 

@@ -30,7 +30,7 @@
       "name": "user_email",
       "label": "Email",
       "hint": "Tried if Zendesk User ID and External ID are unset or found no match, before Name. Also used to create a new user if Create If Missing is enabled.",
-      "data_type": "string",
+      "data_type": "email",
       "required": false,
       "input_source": "variable"
     },

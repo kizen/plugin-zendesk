@@ -14,7 +14,7 @@
       "name": "requester_email",
       "label": "Requester Email",
       "hint": "Matches tickets requested by this email address.",
-      "data_type": "string",
+      "data_type": "email",
       "required": false,
       "input_source": "variable"
     },

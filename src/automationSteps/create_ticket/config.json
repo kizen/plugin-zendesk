@@ -38,7 +38,7 @@
       "name": "requester_email",
       "label": "Requester Email",
       "hint": "Attributes the ticket to this requester, creating them if they don't already exist. Leave blank to use the connected Zendesk account as requester.",
-      "data_type": "string",
+      "data_type": "email",
       "required": false,
       "input_source": "variable"
     },

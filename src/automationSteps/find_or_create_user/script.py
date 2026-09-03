@@ -99,7 +99,9 @@ zendesk_subdomain = secrets[subdomain_secret_key]
 
 full_domain = f"{zendesk_subdomain}.zendesk.com"
 
-# Precedence when more than one is set: Zendesk User ID > External ID > Email > Name — not combined into one query, since Zendesk ANDs terms together.
+# Precedence when more than one is set: Zendesk User ID > External ID > Email > Name — each provided key is tried in turn until one matches.
+user = None
+
 if zendesk_user_id:
     # Direct record fetch by Zendesk's primary key; a 404 means no match, not a fatal error.
     resp = zendesk_request_with_retry(
@@ -107,12 +109,11 @@ if zendesk_user_id:
         f"{BASE_URL}/api/v2/users/{zendesk_user_id}.json",
         params={"full_domain": full_domain},
     )
-    if upstream_status_code(resp) == 404:
-        user = None
-    else:
+    if upstream_status_code(resp) != 404:
         check_response(resp, "searching for user by Zendesk User ID")
         user = resp.json().get("body", {}).get("user")
-elif external_id:
+
+if not user and external_id:
     # Dedicated list-with-filter endpoint — a precise match, unlike the general search endpoint below.
     resp = zendesk_request_with_retry(
         kizen.api.get,
@@ -122,7 +123,8 @@ elif external_id:
     check_response(resp, "searching for user by external ID")
     users = resp.json().get("body", {}).get("users") or []
     user = users[0] if users else None
-elif email:
+
+if not user and email:
     resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/users/search.json",
@@ -131,7 +133,8 @@ elif email:
     check_response(resp, "searching for user by email")
     users = resp.json().get("body", {}).get("users") or []
     user = users[0] if users else None
-else:
+
+if not user and name:
     resp = zendesk_request_with_retry(
         kizen.api.get,
         f"{BASE_URL}/api/v2/users/search.json",

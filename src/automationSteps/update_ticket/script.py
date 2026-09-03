@@ -12,51 +12,52 @@ VALID_STATUSES = {"new", "open", "pending", "hold", "solved", "closed"}
 # HELPERS
 
 
-def is_upstream_error(resp):
-    # Proxy can return its own 200 while wrapping a failed upstream call (e.g. status_code 503 in the body).
+def check_response(resp, context):
+    """Raise if the proxy or Zendesk returned an error."""
     if not resp.ok:
-        return True
+        try:
+            payload = resp.json()
+        except Exception:
+            raise Exception(f"Proxy error {context} — HTTP {resp.status_code}")
+        detail = payload.get("error") or payload.get("detail") if isinstance(payload, dict) else None
+        raise Exception(f"Proxy error {context} — {detail or f'HTTP {resp.status_code}'}")
+
     try:
         payload = resp.json()
     except Exception:
-        return False
-    status_code = payload.get("status_code") if isinstance(payload, dict) else None
-    return isinstance(status_code, int) and not (200 <= status_code < 300)
+        raise Exception(f"Unexpected non-JSON response {context} — HTTP {resp.status_code}")
 
+    if not isinstance(payload, dict):
+        return
 
-def raise_zendesk_error(resp, context):
-    try:
-        payload = resp.json()
-    except Exception:
-        raise Exception(f"Zendesk error {context}: unknown_error — HTTP {resp.status_code}")
+    status_code = payload.get("status_code")
+    if isinstance(status_code, int) and not (200 <= status_code < 300):
+        body = payload.get("body")
+        if isinstance(body, dict):
+            error = body.get("error")
+            description = body.get("description")
+            details = body.get("details")
+            if error or description:
+                label = error.get("title") if isinstance(error, dict) else error
+                message = f"Zendesk error {context}: {label or 'unknown_error'}"
+                if description:
+                    message += f" — {description}"
+                if isinstance(details, dict) and details:
+                    detail_bits = []
+                    for field, issues in details.items():
+                        for issue in issues if isinstance(issues, list) else [issues]:
+                            text = issue.get("description") if isinstance(issue, dict) else str(issue)
+                            if text:
+                                detail_bits.append(f"{field}: {text}")
+                    if detail_bits:
+                        message += " (" + "; ".join(detail_bits) + ")"
+                raise Exception(message)
+        raise Exception(f"Zendesk error {context}: unknown_error — HTTP {status_code}")
 
-    upstream_status = payload.get("status_code", resp.status_code) if isinstance(payload, dict) else resp.status_code
-    body = payload.get("body") if isinstance(payload, dict) else None
-    if isinstance(body, dict):
-        error = body.get("error")
-        description = body.get("description")
-        details = body.get("details")
-        if error or description:
-            label = error.get("title") if isinstance(error, dict) else error
-            message = f"Zendesk error {context}: {label or 'unknown_error'}"
-            if description:
-                message += f" — {description}"
-            if isinstance(details, dict) and details:
-                detail_bits = []
-                for field, issues in details.items():
-                    for issue in issues if isinstance(issues, list) else [issues]:
-                        text = issue.get("description") if isinstance(issue, dict) else str(issue)
-                        if text:
-                            detail_bits.append(f"{field}: {text}")
-                if detail_bits:
-                    message += " (" + "; ".join(detail_bits) + ")"
-            raise Exception(message)
-
-    kizen_error = payload.get("error") or payload.get("detail") if isinstance(payload, dict) else None
-    if kizen_error:
-        raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
-
-    raise Exception(f"Zendesk error {context}: unknown_error — HTTP {upstream_status}")
+    if not isinstance(status_code, int):
+        kizen_error = payload.get("error") or payload.get("detail")
+        if kizen_error:
+            raise Exception(f"Zendesk error {context}: proxy_error — {kizen_error}")
 
 
 def zendesk_request_with_retry(method, url, **kwargs):
@@ -148,8 +149,7 @@ if ticket:
         json={"ticket": ticket},
         params={"full_domain": full_domain},
     )
-    if is_upstream_error(resp):
-        raise_zendesk_error(resp, "updating ticket")
+    check_response(resp, "updating ticket")
     result = resp.json().get("body", {}).get("ticket", {})
 
 if add_tag_list:
@@ -159,8 +159,7 @@ if add_tag_list:
         json={"tags": add_tag_list},
         params={"full_domain": full_domain},
     )
-    if is_upstream_error(add_resp):
-        raise_zendesk_error(add_resp, "adding tags")
+    check_response(add_resp, "adding tags")
 
 if remove_tag_list:
     remove_resp = zendesk_request_with_retry(
@@ -169,8 +168,7 @@ if remove_tag_list:
         json={"tags": remove_tag_list},
         params={"full_domain": full_domain},
     )
-    if is_upstream_error(remove_resp):
-        raise_zendesk_error(remove_resp, "removing tags")
+    check_response(remove_resp, "removing tags")
 
 if not result:
     # Only tags changed — the tags endpoint doesn't return ticket_status/updated_at, so fetch them.
@@ -179,8 +177,11 @@ if not result:
         f"{BASE_URL}/api/v2/tickets/{ticket_id}.json",
         params={"full_domain": full_domain},
     )
-    if not is_upstream_error(get_resp):
+    try:
+        check_response(get_resp, "fetching ticket after tag update")
         result = get_resp.json().get("body", {}).get("ticket", {})
+    except Exception:
+        pass
 
 outputs.ticket_id = str(result.get("id", ticket_id))
 outputs.ticket_status = result.get("status", "")

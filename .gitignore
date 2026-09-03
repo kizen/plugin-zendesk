@@ -2,3 +2,5 @@
 .DS_Store
 .kizenapp/
 .claude/
+__pycache__/
+*.pyc

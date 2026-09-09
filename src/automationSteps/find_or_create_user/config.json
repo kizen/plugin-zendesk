@@ -85,7 +85,7 @@
     {
       "name": "user_email",
       "label": "Email",
-      "data_type": "string",
+      "data_type": "email",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },

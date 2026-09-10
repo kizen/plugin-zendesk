@@ -80,7 +80,7 @@ When updating ticket fields (not just tags), this action fetches the ticket's cu
 
 **Outputs:** `comment_id`, `created_at`, `is_public`.
 
-Zendesk's ticket-update response doesn't echo back the comment that was just added — only the ticket. This action makes a second call, `GET /tickets/{id}/comments.json?sort_order=desc&per_page=1`, and takes the first row as the new comment.
+The comment's `comment_id`/`created_at`/`is_public` are read from the update response's `audit.events` entry for the comment, not a separate follow-up call — this avoids a race condition where a concurrent update from another user or automation could otherwise cause a "fetch the newest comment" call to return the wrong comment.
 
 ### Get Ticket
 

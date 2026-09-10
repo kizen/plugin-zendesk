@@ -100,17 +100,9 @@ resp = zendesk_request_with_retry(
 )
 check_response(resp, "adding ticket comment")
 
-# Update response only echoes the ticket, not the new comment — fetch newest-first and take the top row.
-comments_resp = zendesk_request_with_retry(
-    kizen.api.get,
-    f"{BASE_URL}/api/v2/tickets/{ticket_id}/comments.json",
-    params={"sort_order": "desc", "per_page": 1, "full_domain": full_domain},
-)
-check_response(comments_resp, "fetching new comment")
+audit = resp.json().get("body", {}).get("audit", {})
+comment_event = next((e for e in audit.get("events", []) if e.get("type") == "Comment"), {})
 
-comments = comments_resp.json().get("body", {}).get("comments", [])
-comment = comments[0] if comments else {}
-
-outputs.comment_id = str(comment.get("id", ""))
-outputs.created_at = comment.get("created_at", "")
-outputs.is_public = comment.get("public", is_public)
+outputs.comment_id = str(comment_event.get("id", ""))
+outputs.created_at = audit.get("created_at", "")
+outputs.is_public = comment_event.get("public", is_public)

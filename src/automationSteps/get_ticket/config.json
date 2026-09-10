@@ -69,7 +69,7 @@
       "name": "requester_email",
       "label": "Requester Email",
       "hint": "Requires a second lookup against the requester's user record — blank if that lookup fails.",
-      "data_type": "string",
+      "data_type": "email",
       "conflict_resolution": "overwrite",
       "create_field_options": false
     },

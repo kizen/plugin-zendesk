@@ -2,8 +2,7 @@ import json
 import time
 from urllib.parse import urlparse
 
-# Preview-qualified while this plugin's PR is open; switch to plain "zendesk" once merged.
-PLUGIN_API_NAME = "zendesk_preview_kzn_18120_spike_explore_zendesk_integration"
+PLUGIN_API_NAME = "zendesk"
 BASE_URL = f"/external-integrations/proxy/{PLUGIN_API_NAME}/zendesk_api"
 
 VALID_STATUSES = {"new", "open", "pending", "hold", "solved", "closed"}

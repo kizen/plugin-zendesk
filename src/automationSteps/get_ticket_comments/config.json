@@ -1,0 +1,77 @@
+{
+  "api_name": "get_ticket_comments",
+  "name": "Get Ticket Comments",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Fetches a ticket's conversation thread, pre-flattened into one formatted transcript for downstream LLM steps, plus the most recent comment on its own.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_get_ticket_comments",
+  "script": "script.py",
+  "secrets": [
+    "zendesk_subdomain"
+  ],
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable"
+    },
+    {
+      "name": "public_only",
+      "label": "Public Only",
+      "hint": "If true, only include public replies — internal notes are excluded from the thread and from Last Comment.",
+      "data_type": "boolean",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "limit",
+      "label": "Limit",
+      "hint": "Maximum number of most-recent comments to include; paginates automatically to satisfy this. Hard safety cap of 1000. Defaults to 100 if left unset.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "thread_text",
+      "label": "Thread Text",
+      "hint": "The conversation as one formatted transcript, oldest to newest, e.g. \"[2026-07-30 14:02] Jane Agent (public): ...\". If the full transcript would exceed 50,000 characters, the oldest comments are dropped first to fit.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "comment_count",
+      "label": "Comment Count",
+      "hint": "Count of comments included in Thread Text, after applying Public Only and Limit.",
+      "data_type": "number",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_body",
+      "label": "Last Comment Body",
+      "hint": "The most recent comment's text, subject to Public Only filtering.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_is_public",
+      "label": "Last Comment Is Public",
+      "data_type": "boolean",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "last_comment_author_id",
+      "label": "Last Comment Author ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

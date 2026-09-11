@@ -1,0 +1,116 @@
+{
+  "api_name": "find_or_create_user",
+  "name": "Find or Create User",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Looks up a Zendesk end user by Zendesk User ID, External ID, email, or name, trying each one provided in that priority order until one matches, optionally creating them if none does.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_find_or_create_user",
+  "script": "script.py",
+  "secrets": [
+    "zendesk_subdomain"
+  ],
+  "inputs": [
+    {
+      "name": "zendesk_user_id",
+      "label": "Zendesk User ID",
+      "hint": "Zendesk's own internal numeric user ID (not External ID — see that field for the distinction). Highest-priority search key — a direct, unambiguous record fetch, tried before External ID, Email, or Name. If it finds no match, the other provided keys are still tried in order.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "hint": "e.g. a Kizen contact ID, stored on the Zendesk user record for cross-referencing. Tried (via Zendesk's guaranteed-unique external ID lookup) if Zendesk User ID isn't set or found no match, before Email or Name. Also stored on the record when creating a new user.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "user_email",
+      "label": "Email",
+      "hint": "Tried if Zendesk User ID and External ID are unset or found no match, before Name. Also used to create a new user if Create If Missing is enabled.",
+      "data_type": "email",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "user_name",
+      "label": "Name",
+      "hint": "Lowest-priority search key — tried only if Zendesk User ID, External ID, and Email are all either unset or found no match. Required if Create If Missing is true and no user matches yet. Name matching is fuzzy — if more than one user matches, the action raises an error rather than guessing.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "phone",
+      "label": "Phone",
+      "hint": "Only used when creating a new user.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "hint": "Numeric Zendesk organization ID — visible in the organization's URL under Admin Center → People → Organizations. Only used when creating a new user.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "create_if_missing",
+      "label": "Create If Missing",
+      "hint": "If true and no user matches, creates one. Defaults to false — no user is created otherwise.",
+      "data_type": "boolean",
+      "required": false,
+      "input_source": "variable"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "user_id",
+      "label": "User ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "user_name",
+      "label": "Name",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "user_email",
+      "label": "Email",
+      "data_type": "email",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "role",
+      "label": "Role",
+      "hint": "One of: end-user, agent, admin.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "was_created",
+      "label": "Was Created",
+      "hint": "True if a new user was created; false if an existing user was found.",
+      "data_type": "boolean",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

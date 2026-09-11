@@ -1,0 +1,45 @@
+{
+  "name": "Zendesk Integration",
+  "api_name": "zendesk",
+  "version": "0.0.1",
+  "description": "Manage Zendesk support tickets from Kizen agentic workflows.",
+  "published": false,
+  "release_branches": ["main"],
+  "release_environments": ["dev"],
+  "engine": "1.0.0",
+  "entry": "src/",
+  "release_notes_directory": "releaseNotes/",
+  "config_template": {},
+  "base_config": {
+    "secrets": ["zendesk_subdomain"]
+  },
+  "developer_business_id": {
+    "staging": "0fbf2bd5-f7c4-4bb1-a354-6d3d79120a41",
+    "integration": "6895f9c9-968b-4eba-9541-4782ecd9bf01"
+  },
+  "services": [
+    {
+      "service_name": "zendesk_api",
+      "display_name": "Zendesk API",
+      "required_entitlement": null,
+      "auth_type": "oauth",
+      "auth_level": "business",
+      "base_service_url": "https://zendesk.com/api/v2",
+      "sub_domain_regex_validation": "^[a-zA-Z0-9-]+$",
+      "auth_credentials": {
+        "client_id": "zdg-kizen-integration",
+        "client_secret": {
+          "encrypted": true,
+          "value": "eyJ2IjoxLCJhbGciOiJSU0EtT0FFUC0yNTYrQTI1NkdDTSIsImsiOiJCRUhNQzlaWjZuWDAwbldSV24wYWg2NEVVbzAxSFdhNTM0WHlFZmJ2V3JlSFA3T0Y0WXhUWDZXK1AxMkc0MDB4cEV3VklXMThYcGRqcEN1Y2NTRUZJSUx6a0owTG10VHBXMlJUbFJzOHRCR0RqNkhWWnBSRjlrUzJqd2orSERvWldWVUtyQUVWRDVBVmFLQmdTNy9HcG01ejZkdEUvUVNZWGUyNXBmMnBYVi9vRzQzb1BVbTd0U2NXYU56S1Q5a0Z6UTdrUDFXWVo4ZUFkQ25VYkcxQkJySDJ0MEF3WEJ4SjM1cTJUeG4wamZYZmRPSUtwQ0VMZCthMm1GbUFtNUZuU2o2Sy9XUklHVWt1blZvdzZLNGNDVTRIK3RubS9DRGpzT3lCUlZjUW5RNk9GTmFaUER0UjFPak1QTWNlM1RCL2dZeXEwOXUvS2dFMlhsVHh4QkRqdTk3MW00SGJ3cG1BaGxEVWRyMWFRODdaMVRVaXNiSDJYZlA0b0RGT25yV0JwVHhWSUpkRjk5cTk4R2piSlF5c3BZRjQ2Y2FhR1pOU2NUOXR0UEdUSE9DWEFEeXhpYzBmMi9iWWlmaTYxMUhKWEVsaDBIbW9yRnkzdkU1Z0pLWjJmQjBsOHVIUE51a01kd2tJZlFVcFY2Z0c5ZDhHUlhteWFzLy9yRmc0STN2QyIsIml2IjoibkszM0RWY014ZW5neDFnRyIsInRhZyI6IjMyaUlBeUlvbVNuK2JZRkpwUEd1WlE9PSIsImN0IjoiaXM5cGZJL0thSWRaYVpsTlg5dFVmTmFRc0ZqNG5HaWVIMnNwRCtWNExGNUFqVDUrdVZUa0p0U3RNcUdXbHN5OUlIUDZ5dncyMnV5YUVwWHFkNXZpMEE9PSJ9"
+        },
+        "content_type": "application/json",
+        "scopes": "read tickets:read tickets:write users:read users:write",
+        "authorize_url": "https://{{secret.zendesk_subdomain}}.zendesk.com/oauth/authorizations/new",
+        "token_url": "https://{{secret.zendesk_subdomain}}.zendesk.com/oauth/tokens",
+        "token_field_name": "access_token",
+        "success_redirect_path": "/oauth/success",
+        "error_redirect_path": "/oauth/error"
+      }
+    }
+  ]
+}

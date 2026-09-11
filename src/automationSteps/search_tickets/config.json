@@ -1,0 +1,120 @@
+{
+  "api_name": "search_tickets",
+  "name": "Search Tickets",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Finds tickets by requester, status, priority, type, tags, organization, external ID, or date. Combine filters, or supply a raw Zendesk search query for full control.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_search_tickets",
+  "script": "script.py",
+  "secrets": [
+    "zendesk_subdomain"
+  ],
+  "inputs": [
+    {
+      "name": "requester_email",
+      "label": "Requester Email",
+      "hint": "Matches tickets requested by this email address.",
+      "data_type": "email",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "ticket_status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "type",
+      "label": "Ticket Type",
+      "hint": "One of: problem, incident, question, task.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "ticket_tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags — matches tickets having ANY of these tags (Zendesk treats repeated tags: clauses as OR).",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "hint": "Numeric Zendesk organization ID — visible in the organization's URL under Admin Center → People → Organizations.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "created_after",
+      "label": "Created After",
+      "hint": "Date or datetime, with time-of-day and timezone honored if given.",
+      "data_type": "datetime",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "updated_after",
+      "label": "Updated After",
+      "hint": "Date or datetime, with time-of-day and timezone honored if given.",
+      "data_type": "datetime",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "hint": "Matches tickets with this External ID (set via Create Ticket or Update Ticket).",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "raw_query",
+      "label": "Raw Query",
+      "hint": "Raw Zendesk search query fragment (see Zendesk's search syntax docs). If set, this REPLACES every filter above — combined only with a fixed type:ticket.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    },
+    {
+      "name": "limit",
+      "label": "Limit",
+      "hint": "Maximum number of matching tickets to return; paginates automatically to satisfy this. Zendesk caps search at 1,000 total results (100/page, 10 pages) — requests above that are clamped. Defaults to 100 if left unset.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "tickets",
+      "label": "Tickets",
+      "hint": "JSON array string of matching tickets, each with id/subject/status/priority/requester_id/updated_at/ticket_url. If the full list would exceed 50,000 characters, the oldest tickets are dropped first to fit.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "count",
+      "label": "Count",
+      "hint": "Number of tickets included in Tickets.",
+      "data_type": "number",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

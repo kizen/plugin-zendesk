@@ -1,0 +1,136 @@
+{
+  "api_name": "get_ticket",
+  "name": "Get Ticket",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Fetches a ticket's current state, including its requester's email address.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_get_ticket",
+  "script": "script.py",
+  "secrets": [
+    "zendesk_subdomain"
+  ],
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "subject",
+      "label": "Ticket Title",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "ticket_status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "priority",
+      "label": "Priority",
+      "hint": "One of: urgent, high, normal, low.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "type",
+      "label": "Ticket Type",
+      "hint": "One of: problem, incident, question, task.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "ticket_tags",
+      "label": "Tags",
+      "hint": "Comma-separated list of tags.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "requester_email",
+      "label": "Requester Email",
+      "hint": "Requires a second lookup against the requester's user record — blank if that lookup fails.",
+      "data_type": "email",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "requester_id",
+      "label": "Requester ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "assignee_id",
+      "label": "Assignee ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "group_id",
+      "label": "Group ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "organization_id",
+      "label": "Organization ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "external_id",
+      "label": "External ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "created_at",
+      "label": "Created At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "datetime",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "updated_at",
+      "label": "Updated At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "datetime",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "ticket_url",
+      "label": "Ticket URL",
+      "hint": "Agent-facing ticket URL.",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

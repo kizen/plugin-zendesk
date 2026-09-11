@@ -1,0 +1,69 @@
+{
+  "api_name": "add_ticket_comment",
+  "name": "Add Ticket Comment",
+  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
+  "action_description": "Posts a public reply or an internal note on an existing ticket, optionally changing its status at the same time.",
+  "runtime": "python-3-13",
+  "action_type": "zendesk_add_ticket_comment",
+  "script": "script.py",
+  "secrets": [
+    "zendesk_subdomain"
+  ],
+  "inputs": [
+    {
+      "name": "ticket_id",
+      "label": "Ticket ID",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable"
+    },
+    {
+      "name": "body",
+      "label": "Comment",
+      "hint": "The comment text to add.",
+      "data_type": "string",
+      "required": true,
+      "input_source": "variable"
+    },
+    {
+      "name": "is_public",
+      "label": "Is Public Comment",
+      "hint": "True posts a public reply, visible to the requester; false posts an internal note, visible only to agents.",
+      "data_type": "boolean",
+      "required": true,
+      "input_source": "variable"
+    },
+    {
+      "name": "ticket_status",
+      "label": "Status",
+      "hint": "One of: new, open, pending, hold, solved, closed. Leave blank to leave status unchanged.",
+      "data_type": "string",
+      "required": false,
+      "input_source": "variable"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "comment_id",
+      "label": "Comment ID",
+      "data_type": "string",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "created_at",
+      "label": "Created At",
+      "hint": "ISO 8601 timestamp as returned by Zendesk.",
+      "data_type": "datetime",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    },
+    {
+      "name": "is_public",
+      "label": "Is Public Comment",
+      "data_type": "boolean",
+      "conflict_resolution": "overwrite",
+      "create_field_options": false
+    }
+  ]
+}

@@ -4,7 +4,7 @@ Create, update, and search Zendesk support tickets, post replies and internal no
 
 ## Overview
 
-This plugin connects a Zendesk account to Kizen and exposes seven actions as Agentic Workflow Code Steps. All actions run as Python 3.13 Code Steps and communicate with Zendesk through Kizen's external-integrations proxy.
+This plugin connects a Zendesk account to Kizen and exposes seven actions as Agentic Workflow Code Steps.
 
 ## Actions
 
@@ -21,8 +21,6 @@ This plugin connects a Zendesk account to Kizen and exposes seven actions as Age
 ## Authentication
 
 This plugin uses a **business-level** OAuth 2.0 connection — one shared Zendesk account connects on behalf of the whole business, rather than each user connecting individually. Every action runs as a Kizen Code Step, which always executes as a fixed service account and cannot complete a per-user OAuth consent flow.
-
-**Unlike Kizen's other OAuth integrations, Zendesk has no Kizen-owned shared app.** Each customer must create their own OAuth client inside their own Zendesk subdomain and connect it to this plugin.
 
 ### Setup
 
@@ -116,12 +114,4 @@ At least one of `zendesk_user_id`, `external_id`, `user_email`, or `user_name` m
 
 ## Known Limitations
 
-- **Multi-tenant OAuth client identity is not yet solved.** Per-business host routing and OAuth-URL redirection work correctly (every action routes to the connected business's own Zendesk subdomain), but `client_id`/`client_secret` are currently static — a single OAuth client, shared across every business that connects this plugin. A genuinely different Zendesk account would reject that client outright, since Zendesk OAuth clients are registered per-account. **The confirmed path forward is Zendesk's [Global OAuth Client](https://developer.zendesk.com/documentation/marketplace/building-a-marketplace-app/set-up-a-global-oauth-client/) program**, which lets a single registered client authenticate across many Zendesk accounts instead of being locked to one. It requires a sponsored developer account (subdomain prefixed `d3v-`) and a request through the Zendesk Marketplace portal.
-- **OAuth refresh tokens can expire faster than expected.** Zendesk's refresh tokens are single-use and rotate on every refresh; if the rotated token isn't persisted correctly by the refresh cycle, the connection can die and need reconnecting more often than the token's nominal lifetime would suggest.
-- **Rate limits** are plan-dependent (roughly 200–2,500 requests/min account-wide); Update Ticket is additionally capped at 100/min account-wide and 30 per 10 minutes per user per ticket. `/api/v2/search` caps at 1,000 results. Search Tickets and Get Ticket Comments respect these via pagination; a single-retry-on-429 helper respects `Retry-After` up to 20 seconds.
-- **No attachment support, no side conversations, no bulk/batch operations, no change-notification trigger.**
-- Zendesk's brand guidelines require third-party logo use to go through Zendesk Legal — this plugin ships a generic, non-branded placeholder icon.
-
-## Architecture Notes
-
-**Per-business host routing.** Every action reads a `zendesk_subdomain` Integration Secret and builds a `full_domain` query parameter on every real Zendesk call, so each business's actions route to that business's own account. The same secret name also templates `authorize_url`/`token_url` in `kizen.json` via `{{secret.zendesk_subdomain}}`, so the OAuth connect flow itself authenticates against the business's own account — but this is a genuinely separate value registration from the Integration Secret, despite the identical name; setting one does not set the other.
+- **Rate limits** are plan-dependent (roughly 200–2,500 requests/min account-wide); Update Ticket is additionally capped at 100/min account-wide and 30 per 10 minutes per user per ticket. `/api/v2/search` caps at 1,000 results. Search Tickets and Get Ticket Comments respect these via pagination.

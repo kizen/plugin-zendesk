@@ -1,9 +1,9 @@
 {
   "name": "Zendesk Integration",
   "api_name": "zendesk",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Manage Zendesk support tickets from Kizen agentic workflows.",
-  "published": false,
+  "published": true,
   "release_branches": ["main"],
   "release_environments": ["dev"],
   "engine": "1.0.0",

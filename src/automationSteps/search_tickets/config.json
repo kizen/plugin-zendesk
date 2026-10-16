@@ -1,10 +1,8 @@
 {
   "api_name": "search_tickets",
   "name": "Search Tickets",
-  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Finds tickets by requester, status, priority, type, tags, organization, external ID, or date. Combine filters, or supply a raw Zendesk search query for full control.",
   "runtime": "python-3-13",
-  "action_type": "zendesk_search_tickets",
   "script": "script.py",
   "secrets": [
     "zendesk_subdomain"
@@ -14,7 +12,7 @@
       "name": "requester_email",
       "label": "Requester Email",
       "hint": "Matches tickets requested by this email address.",
-      "data_type": "email",
+      "data_type": "string",
       "required": false,
       "input_source": "variable"
     },

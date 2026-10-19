@@ -1,10 +1,8 @@
 {
   "api_name": "get_ticket_comments",
   "name": "Get Ticket Comments",
-  "plugin_description": "Integrates with Zendesk to manage support tickets from Kizen agentic workflows.",
   "action_description": "Fetches a ticket's conversation thread, pre-flattened into one formatted transcript for downstream LLM steps, plus the most recent comment on its own.",
   "runtime": "python-3-13",
-  "action_type": "zendesk_get_ticket_comments",
   "script": "script.py",
   "secrets": [
     "zendesk_subdomain"
